@@ -20,7 +20,9 @@ class DirPanel(Panel):
         self.path_list = None
         self.show_hidden = lfopt.show_hidden
         self._create_popup()
-        self.winwidth = int(vimeval("winwidth({})".format(self.winid)))
+        self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
+        winheight = vimeval("winheight({})".format(self.winid), 1)
+        self.scroll_line = winheight // 2
 
     def _create_popup(self):
         self.winid = vimeval("popup_create([], {})".format(self.opt))
@@ -123,6 +125,19 @@ class DirPanel(Panel):
         if not self._empty():
             self.index = self._len() - 1
             self._cursorline()
+
+    def _scroll(self, down=True):
+        if not self._empty():
+            sign = 1 if down else -1
+            self.index += sign * self.scroll_line
+            self._correct_index()
+            self._cursorline()
+
+    def scrollup(self):
+        self._scroll(down=False)
+
+    def scrolldown(self):
+        self._scroll(down=True)
 
     def toggle_hidden(self):
         self.show_hidden = not self.show_hidden

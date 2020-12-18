@@ -67,6 +67,16 @@ class Manager(object):
         self._set_curpath()
         self._change_right()
 
+    def scrollup(self):
+        self.middle_panel.scrollup()
+        self._set_curpath()
+        self._change_right()
+
+    def scrolldown(self):
+        self.middle_panel.scrolldown()
+        self._set_curpath()
+        self._change_right()
+
     def _open(self, cmd):
         if self.curpath.is_file():
             self._close()
