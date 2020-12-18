@@ -116,14 +116,9 @@ class DirPanel(Panel):
     def _len(self):
         return len(self.path_list)
 
-    def top(self):
+    def jump(self, top=True):
         if not self._empty():
-            self.index = 0
-            self._cursorline()
-
-    def bottom(self):
-        if not self._empty():
-            self.index = self._len() - 1
+            self.index = 0 if top else self._len() - 1
             self._cursorline()
 
     def _scroll(self, down=True):
