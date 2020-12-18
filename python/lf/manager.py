@@ -94,6 +94,21 @@ class Manager(object):
     def edit(self):
         self._open("edit")
 
+    def open_top(self):
+        self._open("topleft split")
+
+    def open_bottom(self):
+        self._open("botright split")
+
+    def open_left(self):
+        self._open("vert topleft split")
+
+    def open_right(self):
+        self._open("vert botright split")
+
+    def open_tab(self):
+        self._open("tabedit")
+
     def quit(self):
         self._close()
 
