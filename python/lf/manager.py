@@ -1,7 +1,16 @@
-from pathlib import Path
 from .utils import vimeval, vimcmd
 from .panel import DirPanel, FilePanel
 from .option import lfopt
+from pathlib import Path
+
+
+def update(fun):
+    def wrapper(*args, **kwargs):
+        fun(*args, **kwargs)
+        self = args[0]
+        self._set_curpath()
+        self._change_right()
+    return wrapper
 
 
 class Manager(object):
@@ -51,35 +60,29 @@ class Manager(object):
             self._set_curpath()
             self._change_right()
 
+    @update
     def down(self):
         self.middle_panel.move(down=True)
-        self._set_curpath()
-        self._change_right()
 
+    @update
     def up(self):
         self.middle_panel.move(down=False)
-        self._set_curpath()
-        self._change_right()
 
+    @update
     def top(self):
         self.middle_panel.jump(top=True)
-        self._set_curpath()
-        self._change_right()
 
+    @update
     def bottom(self):
         self.middle_panel.jump(top=False)
-        self._set_curpath()
-        self._change_right()
 
+    @update
     def scrollup(self):
         self.middle_panel.scroll(down=False)
-        self._set_curpath()
-        self._change_right()
 
+    @update
     def scrolldown(self):
         self.middle_panel.scroll(down=True)
-        self._set_curpath()
-        self._change_right()
 
     def _open(self, cmd):
         if self.curpath.is_file():
