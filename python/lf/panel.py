@@ -125,10 +125,10 @@ class FilePanel(Panel):
         path = path.resolve()
         self.buf_exist = vimeval("bufexists('{}') == v:true".format(path)) == '1'
         if self.buf_exist:
-            vimcmd("noautocmd let winid = bufnr('{}')->popup_create({})".format(path, opt))
+            vimcmd("noautocmd silent let winid = bufnr('{}')->popup_create({})".format(path, opt))
             self.winid = vimeval("winid")
         else:
-            vimcmd("noautocmd let winid = '{}'->bufadd()->popup_create({})".format(path, opt))
+            vimcmd("noautocmd silent let winid = '{}'->bufadd()->popup_create({})".format(path, opt))
             self.winid = vimeval("winid")
             winid = self.winid
             setlocal(winid, "wrap")
