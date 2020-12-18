@@ -57,6 +57,16 @@ class Manager(object):
     def up(self):
         self._move(False)
 
+    def top(self):
+        self.middle_panel.top()
+        self._set_curpath()
+        self._change_right()
+
+    def bottom(self):
+        self.middle_panel.bottom()
+        self._set_curpath()
+        self._change_right()
+
     def _open(self, cmd):
         if self.curpath.is_file():
             self._close()

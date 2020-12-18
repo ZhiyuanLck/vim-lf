@@ -111,6 +111,19 @@ class DirPanel(Panel):
     def up(self):
         return self._move(False)
 
+    def _len(self):
+        return len(self.path_list)
+
+    def top(self):
+        if not self._empty():
+            self.index = 0
+            self._cursorline()
+
+    def bottom(self):
+        if not self._empty():
+            self.index = self._len() - 1
+            self._cursorline()
+
     def toggle_hidden(self):
         self.show_hidden = not self.show_hidden
         # get current path before path list changed
