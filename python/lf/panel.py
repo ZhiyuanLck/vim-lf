@@ -58,7 +58,10 @@ class DirPanel(Panel):
         """
         correct index when text list changed such as refesh, delete, paste
         """
-        self.index = self.index if self.index < len(self.text) else len(self.text) - 1
+        if self.index < 0:
+            self.index = 0
+        elif self.index >= self._len():
+            self.index = self._len() - 1
 
     def _empty(self):
         return self.path_list == []
