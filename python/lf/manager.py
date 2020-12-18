@@ -51,16 +51,15 @@ class Manager(object):
             self._set_curpath()
             self._change_right()
 
-    def _move(self, down=True):
-        self.middle_panel.move(down)
+    def down(self):
+        self.middle_panel.move(down=True)
         self._set_curpath()
         self._change_right()
 
-    def down(self):
-        self._move(down=True)
-
     def up(self):
-        self._move(down=False)
+        self.middle_panel.move(down=False)
+        self._set_curpath()
+        self._change_right()
 
     def top(self):
         self.middle_panel.jump(top=True)
