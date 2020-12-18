@@ -10,6 +10,7 @@ class Option(object):
         self.auto_edit = vimget('auto_edit', 0) == '1'
         self.auto_edit_cmd = vimget('auto_edit_cmd', "'edit'")
         self.laststatus = vimeval('&laststatus')
+        self.t_ve = vimeval('&t_ve')
 
     def _popup(self):
         self.opts = {
