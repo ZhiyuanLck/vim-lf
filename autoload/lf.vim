@@ -18,7 +18,7 @@ function! lf#action() abort
   redraw
   let nr = getchar()
   let ch = type(nr) ? nr : nr2char(nr)
-  let action = g:vlf_mapping[ch]
+  let action = get(g:vlf_mapping, ch, 'skip')
   exec g:vlf_py printf("vlf_manager.%s()", action)
   return action
 endfunction

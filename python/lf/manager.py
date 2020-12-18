@@ -75,6 +75,9 @@ class Manager(object):
         if self._right_is_dir():
             self.right_panel.toggle_hidden()
 
+    def skip(self):
+        pass
+
     def _right_is_dir(self):
         return isinstance(self.right_panel, DirPanel)
 
