@@ -51,11 +51,16 @@ class Manager(object):
             self._set_curpath()
             self._change_right()
 
+    def _move(self, down=True):
+        self.middle_panel.move(down)
+        self._set_curpath()
+        self._change_right()
+
     def down(self):
-        self._move(True)
+        self._move(down=True)
 
     def up(self):
-        self._move(False)
+        self._move(down=False)
 
     def top(self):
         self.middle_panel.jump(top=True)
@@ -112,11 +117,6 @@ class Manager(object):
 
     def _set_middle(self):
         self.middle_panel = DirPanel(self.cwd, lfopt.middle, 1)
-
-    def _move(self, down=True):
-        self.curpath = self.middle_panel.down() if down else self.middle_panel.up()
-        if self.curpath is not None:
-            self._change_right()
 
     def _show_dir(self):
         if self.curpath is None:

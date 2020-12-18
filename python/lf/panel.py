@@ -101,7 +101,7 @@ class DirPanel(Panel):
         if curpath.is_dir():
             self.cwd = curpath
 
-    def _move(self, down=True):
+    def move(self, down=True):
         max = len(self.text)
         if not max:
             return
@@ -109,12 +109,6 @@ class DirPanel(Panel):
         self.index = (self.index + offset) % max
         self._cursorline()
         return self.curpath()
-
-    def down(self):
-        return self._move()
-
-    def up(self):
-        return self._move(False)
 
     def _len(self):
         return len(self.path_list)
