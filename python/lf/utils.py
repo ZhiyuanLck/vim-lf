@@ -31,8 +31,10 @@ vimget = partial(_vimget, 'g:', 'fterm')
 def setlocal(winid, cmd):
     vimcmd("call win_execute({}, 'setlocal {}')".format(winid, cmd))
 
+
 def winexec(winid, cmd):
     vimcmd("call win_execute({}, '{}')".format(winid, cmd))
+
 
 def get_cwd():
     cwd = vimeval("fnamemodify(resolve(expand('%:p')), ':p:h')")
@@ -57,5 +59,14 @@ def get_cwd():
         n += 1
     return str(cur) if is_root and cur != Path.home() else cwd
 
+
 def vimsg(type, msg):
     vimcmd(r"""echohl {} | echom "{}" | echohl None""".format(type, msg))
+
+
+def get_key(key):
+    if key.startswith('<'):
+        vimcmd('let s:key = "\\{}"'.format(key))
+        vimcmd("echom s:key")
+    else:
+        vimcmd('let s:key = "{}"'.format(key))

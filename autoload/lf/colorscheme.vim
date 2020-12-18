@@ -2,35 +2,35 @@ let s:cterm_fg = synIDattr(hlID("Normal"), "fg", "cterm") ? "fg" : 251
 let s:cterm_bg = synIDattr(hlID("Normal"), "bg", "cterm") ? "bg" : 235
 let s:default_highlights = {
       \ "vlf_hl_dir": #{
-      \   ctermfg : "68",
+      \   ctermfg : "32",
       \   guifg : "#6699cc",
       \   cterm : "bold",
       \   gui : "bold",
       \   },
       \ "vlf_hl_file": #{
-      \   ctermfg : s:cterm_fg,
+      \   ctermfg : "228",
       \   guifg : s:cterm_fg,
       \   },
       \ "vlf_hl_hidden_dir": #{
-      \   ctermfg : "243",
+      \   ctermfg : "248",
       \   guifg : "#657371",
       \   cterm : "bold",
       \   gui : "bold",
       \   },
       \ "vlf_hl_hidden_file": #{
-      \   ctermfg : "243",
+      \   ctermfg : "248",
       \   guifg : "#657371",
       \   },
       \ "vlf_hl_cursorline_0": #{
-      \   ctermbg : "222",
+      \   ctermbg : "240",
       \   guibg : "#343d46",
       \   },
       \ "vlf_hl_cursorline_1": #{
-      \   ctermbg : "222",
+      \   ctermbg : "23",
       \   guibg : "#343d46",
       \   },
       \ "vlf_hl_cursorline_2": #{
-      \   ctermbg : "222",
+      \   ctermbg : "240",
       \   guibg : "#343d46",
       \   },
       \ }

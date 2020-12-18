@@ -47,7 +47,9 @@ class DirPanel(Panel):
             self.cursorline_id = None
         if self._empty():
             return
-        self.cursorline_id = vimeval("matchaddpos('vlf_hl_cursorline', [%s], 100, -1, #{window: %s})" % (self.index + 1, self.winid))
+        self.cursorline_id = vimeval(
+                "matchaddpos('vlf_hl_cursorline_%d', [%s], 100, -1, #{window: %s})"
+                % (self.number, self.index + 1, self.winid))
         vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.index + 1))
 
     def _correct_index(self):
@@ -133,6 +135,15 @@ class FilePanel(Panel):
             setlocal(winid, "nobuflisted")
             setlocal(winid, "buftype=nowrite")
             setlocal(winid, "bufhidden=hide")
+            setlocal(winid, "number")
+            setlocal(winid, "undolevels=-1")
+            setlocal(winid, "noswapfile")
+            setlocal(winid, "nolist")
+            setlocal(winid, "norelativenumber")
+            setlocal(winid, "nospell")
+            setlocal(winid, "nofoldenable")
+            setlocal(winid, "foldmethod=manual")
+            setlocal(winid, "signcolumn=no")
         if path.stat().st_size < lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))

@@ -9,8 +9,10 @@ class Manager(object):
         vimcmd("call lf#colorscheme#highlight()")
 
     def start(self, cwd):
+        self.is_edit = False
         self.cwd = Path(cwd).resolve()
         self._create()
+        #  vimcmd("call lf#action()")
         self._action()
 
     def _create(self):
@@ -22,24 +24,15 @@ class Manager(object):
         self._change_right(True)
 
     def _action(self):
+        break_list = ['edit', 'quit']
         while 1:
-            vimcmd("redraw")
-            vimcmd("let nr = getchar()")
-            vimcmd("let ch = type(nr) ? nr : nr2char(nr)")
-            vimcmd("echom ch")
-            if vimeval("ch == 'h'") == '1':
-                self.backward()
-            if vimeval("ch == 'l'") == '1':
-                self.forward()
-            elif vimeval("ch == 'j'") == '1':
-                self.down()
-            elif vimeval("ch == 'k'") == '1':
-                self.up()
-            elif vimeval("ch == 's'") == '1':
-                self.toggle_hidden()
-            elif vimeval(r'ch == "q"') == '1':
-                self._close()
-                break
+            action = vimeval("lf#action()")
+            print(action)
+            if action in break_list:
+                if action == 'edit' and not self.is_edit:
+                    continue
+                else:
+                    break
 
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
@@ -65,6 +58,18 @@ class Manager(object):
     def up(self):
         self._move(False)
 
+    def _open(self, cmd):
+        if self.curpath.is_file():
+            self._close()
+            vimcmd("{} {}".format(cmd, self._cur_path()))
+            self.is_edit = True
+
+    def edit(self):
+        self._open("edit")
+
+    def quit(self):
+        self._close()
+
     def toggle_hidden(self):
         self.left_panel.toggle_hidden()
         self.middle_panel.toggle_hidden()
@@ -73,6 +78,9 @@ class Manager(object):
 
     def _right_is_dir(self):
         return isinstance(self.right_panel, DirPanel)
+
+    def _cur_path(self):
+        return str(self.curpath.resolve()).replace(' ', '\\ ')
 
     def _set_curpath(self):
         self.curpath = self.middle_panel.curpath()
@@ -119,6 +127,6 @@ class Manager(object):
         b.refresh()
 
 
-lf_manager = Manager()
+vlf_manager = Manager()
 
-__all__ = ['lf_manager']
+__all__ = ['vlf_manager']

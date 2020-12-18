@@ -33,6 +33,8 @@ class Option(object):
 
     def _right_opt(self):
         self.opts["col"] = 86
+        self.opts["maxwidth"] = 60
+        self.opts["minwidth"] = 60
         self.right = copy(self.opts)
 
 
