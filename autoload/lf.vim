@@ -7,7 +7,6 @@ cwd = Path(cwd) / '..' / 'python'
 cwd = cwd.resolve()
 sys.path.insert(0, str(cwd))
 from lf.manager import *
-from lf.utils import get_key
 END
 
 function! lf#start(cwd) abort

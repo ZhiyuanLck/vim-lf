@@ -12,7 +12,6 @@ class Manager(object):
         self.is_edit = False
         self.cwd = Path(cwd).resolve()
         self._create()
-        #  vimcmd("call lf#action()")
         self._action()
 
     def _create(self):
@@ -27,12 +26,10 @@ class Manager(object):
         break_list = ['edit', 'quit']
         while 1:
             action = vimeval("lf#action()")
-            print(action)
+            if self.is_edit:
+                break
             if action in break_list:
-                if action == 'edit' and not self.is_edit:
-                    continue
-                else:
-                    break
+                break
 
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
@@ -45,7 +42,8 @@ class Manager(object):
 
     def forward(self):
         if isinstance(self.right_panel, FilePanel):
-            pass
+            if not lfopt.auto_edit:
+                self._open(lfopt.auto_edit_cmd)
         else:
             self._copy_panel(self.middle_panel, self.left_panel)
             self._copy_panel(self.right_panel, self.middle_panel)

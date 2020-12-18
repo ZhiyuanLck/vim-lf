@@ -4,7 +4,7 @@ function! s:init_var(name, default) abort
 endfunction
 call s:init_var("max_size", 1)
 call s:init_var("show_hidden", 0)
-call s:init_var("auto_edit", 0)
+call s:init_var("auto_edit", 1)
 call s:init_var("auto_edit_cmd", "edit")
 
 let g:vlf_mapping = {}

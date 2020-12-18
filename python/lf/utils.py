@@ -62,11 +62,3 @@ def get_cwd():
 
 def vimsg(type, msg):
     vimcmd(r"""echohl {} | echom "{}" | echohl None""".format(type, msg))
-
-
-def get_key(key):
-    if key.startswith('<'):
-        vimcmd('let s:key = "\\{}"'.format(key))
-        vimcmd("echom s:key")
-    else:
-        vimcmd('let s:key = "{}"'.format(key))

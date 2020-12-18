@@ -7,6 +7,9 @@ class Option(object):
         self._popup()
         self.show_hidden = vimget("show_hidden", 0) == '1'
         self.max_file_size = vimget('max_size', 1, 1) * 1048576
+        self.auto_edit = vimget('auto_edit', 0) == '1'
+        print(self.auto_edit)
+        self.auto_edit_cmd = vimget('auto_edit_cmd', "'edit'")
 
     def _popup(self):
         self.opts = {
