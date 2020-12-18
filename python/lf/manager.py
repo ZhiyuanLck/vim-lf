@@ -11,6 +11,7 @@ class Manager(object):
     def start(self, cwd):
         self.is_edit = False
         self.cwd = Path(cwd).resolve()
+        vimcmd("set laststatus=0")
         self._create()
         self._action()
 
@@ -113,6 +114,7 @@ class Manager(object):
         self.left_panel.close()
         self.middle_panel.close()
         self.right_panel.close()
+        vimcmd("set laststatus={}".format(lfopt.laststatus))
 
     def _copy_panel(self, a: DirPanel, b: DirPanel):
         """

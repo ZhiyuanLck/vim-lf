@@ -1,4 +1,4 @@
-from .utils import vimget
+from .utils import vimget, vimeval
 from copy import copy
 
 
@@ -8,8 +8,8 @@ class Option(object):
         self.show_hidden = vimget("show_hidden", 0) == '1'
         self.max_file_size = vimget('max_size', 1, 1) * 1048576
         self.auto_edit = vimget('auto_edit', 0) == '1'
-        print(self.auto_edit)
         self.auto_edit_cmd = vimget('auto_edit_cmd', "'edit'")
+        self.laststatus = vimeval('&laststatus')
 
     def _popup(self):
         self.opts = {
