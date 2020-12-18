@@ -121,18 +121,12 @@ class DirPanel(Panel):
             self.index = 0 if top else self._len() - 1
             self._cursorline()
 
-    def _scroll(self, down=True):
+    def scroll(self, down=True):
         if not self._empty():
             sign = 1 if down else -1
             self.index += sign * self.scroll_line
             self._correct_index()
             self._cursorline()
-
-    def scrollup(self):
-        self._scroll(down=False)
-
-    def scrolldown(self):
-        self._scroll(down=True)
 
     def toggle_hidden(self):
         self.show_hidden = not self.show_hidden

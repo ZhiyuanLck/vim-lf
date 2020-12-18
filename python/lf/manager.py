@@ -68,12 +68,12 @@ class Manager(object):
         self._change_right()
 
     def scrollup(self):
-        self.middle_panel.scrollup()
+        self.middle_panel.scroll(down=False)
         self._set_curpath()
         self._change_right()
 
     def scrolldown(self):
-        self.middle_panel.scrolldown()
+        self.middle_panel.scroll(down=True)
         self._set_curpath()
         self._change_right()
 
