@@ -1,0 +1,39 @@
+from .utils import vimget
+from copy import copy
+
+
+class Option(object):
+    def __init__(self):
+        self._popup()
+        self.show_hidden = vimget("show_hidden", 0) == '1'
+        self.max_file_size = vimget('max_size', 1, 1) * 1048576
+
+    def _popup(self):
+        self.opts = {
+                "maxwidth":  40,
+                "minwidth":  40,
+                "maxheight": 18,
+                "minheight": 18,
+                "pos":       "topleft",
+                "line": 5,
+                "mapping":   0,
+                "scrollbar": 0,
+                }
+        self._left_opt()
+        self._middle_opt()
+        self._right_opt()
+
+    def _left_opt(self):
+        self.opts["col"] = 3
+        self.left = copy(self.opts)
+
+    def _middle_opt(self):
+        self.opts["col"] = 45
+        self.middle = copy(self.opts)
+
+    def _right_opt(self):
+        self.opts["col"] = 86
+        self.right = copy(self.opts)
+
+
+lfopt = Option()
