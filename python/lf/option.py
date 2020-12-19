@@ -13,7 +13,7 @@ class Option(object):
         self.t_ve = vimeval('&t_ve')
 
     def _popup(self):
-        self.opts = {
+        self.popup_opts = {
                 "maxwidth":  40,
                 "minwidth":  40,
                 "maxheight": 18,
@@ -29,29 +29,30 @@ class Option(object):
         #  self._info_opt()
 
     def _left_opt(self):
-        left = copy(self.opts)
+        left = copy(self.popup_opts)
         left["col"] = 3
         self.popup_left = left
 
     def _middle_opt(self):
-        middle = copy(self.opts)
+        middle = copy(self.popup_opts)
         middle["col"] = 45
         self.popup_middle = middle
 
     def _right_opt(self):
-        right = copy(self.opts)
+        right = copy(self.popup_opts)
         right["col"] = 86
         right["maxwidth"] = 60
         right["minwidth"] = 60
         self.popup_right = right
 
     #  def _info_opt(self):
-        #  self.opts["line"] = 25
-        #  self.opts["col"] = 3
-        #  self.opts["maxwidth"] = 60
-        #  self.opts["minwidth"] = 60
-        #  self.opts["maxwidth"] = 60
-        #  self.opts["minwidth"] = 60
+        #  info = copy(self.popup_opts)
+        #  info["line"] = 25
+        #  info["col"] = 3
+        #  info["maxwidth"] = 60
+        #  info["minwidth"] = 60
+        #  info["maxwidth"] = 60
+        #  info["minwidth"] = 60
 
 
 lfopt = Option()
