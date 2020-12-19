@@ -45,7 +45,7 @@ class Manager(object):
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
-            self.right_panel = DirPanel(self.curpath, lfopt.right, 2)
+            self.right_panel = DirPanel(self.curpath, lfopt.popup_right, 2)
         self._copy_panel(self.middle_panel, self.right_panel)
         self._copy_panel(self.left_panel, self.middle_panel)
         self.left_panel.backward()
@@ -131,10 +131,10 @@ class Manager(object):
         self.curpath = self.middle_panel.curpath()
 
     def _set_left(self):
-        self.left_panel = DirPanel(self.cwd, lfopt.left, 0)
+        self.left_panel = DirPanel(self.cwd, lfopt.popup_left, 0)
 
     def _set_middle(self):
-        self.middle_panel = DirPanel(self.cwd, lfopt.middle, 1)
+        self.middle_panel = DirPanel(self.cwd, lfopt.popup_middle, 1)
 
     def _show_dir(self):
         if self.curpath is None:
@@ -145,11 +145,11 @@ class Manager(object):
         if not init:
             self.right_panel.close()
         if self._show_dir():
-            self.right_panel = DirPanel(self.curpath, lfopt.right, 2)
+            self.right_panel = DirPanel(self.curpath, lfopt.popup_right, 2)
             if self.curpath is not None:
                 self.right_panel.refresh()
         else:
-            self.right_panel = FilePanel(self.curpath, lfopt.right)
+            self.right_panel = FilePanel(self.curpath, lfopt.popup_right)
 
     def _close(self):
         self.left_panel.close()
