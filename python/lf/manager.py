@@ -1,5 +1,5 @@
 from .utils import vimeval, vimcmd
-from .panel import DirPanel, FilePanel, InfoPanel
+from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel
 from .option import lfopt
 from pathlib import Path
 
@@ -26,6 +26,7 @@ class Manager(object):
         self._action()
 
     def _create(self):
+        self.border_panel = BorderPanel()
         self.info_panel = InfoPanel()
         self._set_middle()
         self._set_left()
@@ -46,7 +47,7 @@ class Manager(object):
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
-            self.right_panel = DirPanel(self.curpath, lfopt.popup_right, 2, self.info_panel)
+            self.right_panel = DirPanel(self.curpath, 2, self.info_panel)
         self._copy_panel(self.middle_panel, self.right_panel)
         self._copy_panel(self.left_panel, self.middle_panel)
         self.left_panel.backward()
@@ -132,10 +133,10 @@ class Manager(object):
         self.curpath = self.middle_panel.curpath()
 
     def _set_left(self):
-        self.left_panel = DirPanel(self.cwd, lfopt.popup_left, 0, self.info_panel)
+        self.left_panel = DirPanel(self.cwd, 0, self.info_panel)
 
     def _set_middle(self):
-        self.middle_panel = DirPanel(self.cwd, lfopt.popup_middle, 1, self.info_panel)
+        self.middle_panel = DirPanel(self.cwd, 1, self.info_panel)
 
     def _show_dir(self):
         if self.curpath is None:
@@ -146,13 +147,14 @@ class Manager(object):
         if not init:
             self.right_panel.close()
         if self._show_dir():
-            self.right_panel = DirPanel(self.curpath, lfopt.popup_right, 2, self.info_panel)
+            self.right_panel = DirPanel(self.curpath, 2, self.info_panel)
             if self.curpath is not None:
                 self.right_panel.refresh()
         else:
-            self.right_panel = FilePanel(self.curpath, lfopt.popup_right)
+            self.right_panel = FilePanel(self.curpath)
 
     def _close(self):
+        self.border_panel.close()
         self.info_panel.close()
         self.left_panel.close()
         self.middle_panel.close()

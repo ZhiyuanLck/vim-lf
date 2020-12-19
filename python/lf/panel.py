@@ -8,11 +8,13 @@ class Panel(object):
     def close(self):
         vimcmd("call popup_close({})".format(self.winid))
 
+    def _set_wincolor(self):
+        setlocal(self.winid, "wincolor={}".format(lfopt.wincolor))
+
 
 class DirPanel(Panel):
-    def __init__(self, cwd, opt, number, info_panel):
+    def __init__(self, cwd, number, info_panel):
         self.cwd = cwd.resolve()
-        self.opt = opt
         self.number = number
         self.info_panel = info_panel
         self.index = 0
@@ -26,9 +28,16 @@ class DirPanel(Panel):
         self.scroll_line = winheight // 2
 
     def _create_popup(self):
-        self.winid = vimeval("popup_create([], {})".format(self.opt))
+        if self.number == 0:
+            opt = lfopt.popup("left")
+        elif self.number == 1:
+            opt = lfopt.popup("middle")
+        else:
+            opt = lfopt.popup("right")
+        self.winid = vimeval("popup_create([], {})".format(opt))
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         vimcmd("call lf#colorscheme#prop({})".format(self.bufnr))
+        self._set_wincolor()
 
     def _glob(self):
         self.path_list = sorted(self.cwd.glob('*'))
@@ -136,8 +145,9 @@ class DirPanel(Panel):
 
 
 class FilePanel(Panel):
-    def __init__(self, path, opt):
+    def __init__(self, path):
         path = path.resolve()
+        opt = lfopt.popup("right")
         self.buf_exist = vimeval("bufexists('{}') == v:true".format(path)) == '1'
         if self.buf_exist:
             vimcmd("noautocmd silent let winid = bufnr('{}')->popup_create({})".format(path, opt))
@@ -162,6 +172,7 @@ class FilePanel(Panel):
         if path.stat().st_size < lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
+        self._set_wincolor()
 
     def close(self):
         vimcmd("call popup_close({})".format(self.winid))
@@ -171,5 +182,11 @@ class FilePanel(Panel):
 
 class InfoPanel(Panel):
     def __init__(self):
-        self.winid = vimeval("popup_create([], {})".format(lfopt.popup_info))
+        self.winid = vimeval("popup_create([], {})".format(lfopt.popup("info")))
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
+        self._set_wincolor()
+
+class BorderPanel(Panel):
+    def __init__(self):
+        self.winid = vimeval("popup_create([], {})".format(lfopt.popup("border")))
+        self._set_wincolor()

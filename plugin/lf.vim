@@ -2,10 +2,19 @@ function! s:init_var(name, default) abort
   let var = get(g:, 'vlf_'.a:name, a:default)
   exec "let g:vlf_".a:name." = var"
 endfunction
+
 call s:init_var("max_size", 1)
 call s:init_var("show_hidden", 0)
 call s:init_var("auto_edit", 1)
 call s:init_var("auto_edit_cmd", "edit")
+call s:init_var("width", 0.8)
+call s:init_var("height", 0.8)
+call s:init_var("panel_width", [0.2, 0.2])
+call s:init_var("borderchars", ['─', '│', '─', '│', '┌', '┐', '┘', '└'])
+call s:init_var("sepchar", '│')
+call s:init_var("wincolor", 'Normal')
+call s:init_var("padding", [0, 0, 0, 0])
+call s:init_var("border", [1, 1, 1, 1])
 
 let g:vlf_mapping = {}
 

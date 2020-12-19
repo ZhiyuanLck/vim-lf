@@ -33,6 +33,10 @@ let s:default_highlights = {
       \   ctermbg : "240",
       \   guibg : "#343d46",
       \   },
+      \ "vlf_hl_border": #{
+      \   ctermfg : "48",
+      \   guifg : "#343d46",
+      \   },
       \ }
 let s:base_prop = ["dir", "hidden_dir", "file", "hidden_file"]
 let s:extra_prop_patterns = #{}

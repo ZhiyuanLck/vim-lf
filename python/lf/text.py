@@ -11,8 +11,11 @@ class Text(object):
         self.text = [self._get_text(p)[1] for p in self.path_list]
         self.opt = [self._get_opt(p) for p in self.path_list]
 
-    def _len(self, text):
+    def _dplen(self, text):
         return vimeval('strdisplaywidth("{}")'.format(text), 1)
+
+    def _bytelen(self, text):
+        return vimeval('len("{}")'.format(text), 1)
 
     def _is_hidden(self, path):
         return path.name.startswith('.')
@@ -23,10 +26,9 @@ class Text(object):
             start += 1
         slash = '/' if path.is_dir() else ''
         text = str(path)[start:] + slash
-        length = vimeval('len("{}")'.format(text), 1)
-        rest = self.winwidth - length % self.winwidth
+        rest = self.winwidth - self._dplen(text) % self.winwidth
         blank = ' ' * rest
-        return length, text + blank
+        return self._bytelen(text), text + blank
 
     def _get_opt(self, path):
         hidden = self._is_hidden(path)

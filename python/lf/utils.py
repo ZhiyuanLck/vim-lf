@@ -25,7 +25,7 @@ def _vimget(namespace, prefix, var, default, eval_mode=0):
     return vimeval("get({}, '{}_{}', {})".format(namespace, prefix, var, default), eval_mode)
 
 
-vimget = partial(_vimget, 'g:', 'fterm')
+vimget = partial(_vimget, 'g:', 'vlf')
 
 
 def setlocal(winid, cmd):
