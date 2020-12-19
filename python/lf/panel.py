@@ -10,10 +10,11 @@ class Panel(object):
 
 
 class DirPanel(Panel):
-    def __init__(self, cwd, opt, number):
+    def __init__(self, cwd, opt, number, info_panel):
         self.cwd = cwd.resolve()
         self.opt = opt
         self.number = number
+        self.info_panel = info_panel
         self.index = 0
         self.cursorline_id = None
         self.text = None
@@ -144,20 +145,20 @@ class FilePanel(Panel):
         else:
             vimcmd("noautocmd silent let winid = '{}'->bufadd()->popup_create({})".format(path, opt))
             self.winid = vimeval("winid")
-            winid = self.winid
-            setlocal(winid, "wrap")
-            setlocal(winid, "nobuflisted")
-            setlocal(winid, "buftype=nowrite")
-            setlocal(winid, "bufhidden=hide")
-            setlocal(winid, "number")
-            setlocal(winid, "undolevels=-1")
-            setlocal(winid, "noswapfile")
-            setlocal(winid, "nolist")
-            setlocal(winid, "norelativenumber")
-            setlocal(winid, "nospell")
-            setlocal(winid, "nofoldenable")
-            setlocal(winid, "foldmethod=manual")
-            setlocal(winid, "signcolumn=no")
+        winid = self.winid
+        setlocal(winid, "wrap")
+        setlocal(winid, "nobuflisted")
+        setlocal(winid, "buftype=nowrite")
+        setlocal(winid, "bufhidden=hide")
+        setlocal(winid, "number")
+        setlocal(winid, "undolevels=-1")
+        setlocal(winid, "noswapfile")
+        setlocal(winid, "nolist")
+        setlocal(winid, "norelativenumber")
+        setlocal(winid, "nospell")
+        setlocal(winid, "nofoldenable")
+        setlocal(winid, "foldmethod=manual")
+        setlocal(winid, "signcolumn=no")
         if path.stat().st_size < lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
@@ -166,3 +167,9 @@ class FilePanel(Panel):
         vimcmd("call popup_close({})".format(self.winid))
         if not self.buf_exist:
             vimcmd("bwipeout {}".format(self.bufnr))
+
+
+class InfoPanel(Panel):
+    def __init__(self):
+        self.winid = vimeval("popup_create([], {})".format(lfopt.popup_info))
+        self.winwidth = vimeval("winwidth({})".format(self.winid), 1)

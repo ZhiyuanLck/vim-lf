@@ -26,7 +26,7 @@ class Option(object):
         self._left_opt()
         self._middle_opt()
         self._right_opt()
-        #  self._info_opt()
+        self._info_opt()
 
     def _left_opt(self):
         left = copy(self.popup_opts)
@@ -45,14 +45,15 @@ class Option(object):
         right["minwidth"] = 60
         self.popup_right = right
 
-    #  def _info_opt(self):
-        #  info = copy(self.popup_opts)
-        #  info["line"] = 25
-        #  info["col"] = 3
-        #  info["maxwidth"] = 60
-        #  info["minwidth"] = 60
-        #  info["maxwidth"] = 60
-        #  info["minwidth"] = 60
+    def _info_opt(self):
+        info = copy(self.popup_opts)
+        info["line"] = 25
+        info["col"] = 3
+        info["maxwidth"] = 120
+        info["minwidth"] = 120
+        info["maxheight"] = 1
+        info["minheight"] = 1
+        self.popup_info = info
 
 
 lfopt = Option()
