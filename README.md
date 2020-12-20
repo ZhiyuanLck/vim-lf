@@ -11,6 +11,7 @@ Project is in **preview**, which means:
 - Features that already exist may be discarded.
 - Default behavior may be broken.
 - Current UI may be rearranged.
+- Support for nvim is not considered in short term.
 
 ## Screenshot
 
