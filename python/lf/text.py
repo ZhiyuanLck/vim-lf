@@ -2,6 +2,52 @@ from .utils import vimeval
 from .option import lfopt
 
 
+class Line(object):
+    def __init__(self, cwd, path, winwidth):
+        self._cwd = cwd
+        self.path = path
+        self._winwidth = winwidth
+        self._parse_type()
+        self._set_text()
+        self._set_textline()
+
+    def _parse_type(self):
+        self.is_hidden = self.path.name.startswith('.')
+
+    def _dplen(self, text):
+        return vimeval('strdisplaywidth("{}")'.format(text), 1)
+
+    def _bytelen(self, text):
+        return vimeval('len("{}")'.format(text), 1)
+
+    def _set_text(self):
+        start = len(str(self._cwd))
+        if str(self._cwd)[-1] != '/':
+            start += 1
+        slash = '/' if self.path.is_dir() else ''
+        text = str(self.path)[start:] + slash
+        rest = self._winwidth - self._dplen(text) % self._winwidth
+        blank = ' ' * rest
+        self.text = text + blank
+        self.bytelen = self._bytelen(self.text)
+
+    def _set_textline(self):
+        opt = {"text": self.text}
+        prop = {"col": 1, "length": self.bytelen}
+        if self.show_hidden:
+            if self.path.is_dir():
+                prop_type = "hidden_dir" if self.is_hidden else "dir"
+            elif self.path.is_file():
+                prop_type = "hidden_file" if self.is_hidden else "file"
+            else:
+                prop_type = "file"
+        else:
+            prop_type = "dir" if self.path.is_dir() else "file"
+        prop["type"] = prop_type
+        opt["props"] = [prop]
+        self.opt = opt
+
+
 class Text(object):
     def __init__(self, panel):
         self.path_list = panel.path_list
