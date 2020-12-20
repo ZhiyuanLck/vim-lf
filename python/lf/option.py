@@ -81,7 +81,7 @@ class Option(object):
     def _popup(self):
         self.width = vimget('width', 0.8, 2)
         self.height = vimget('height', 0.8, 2)
-        panel_width = vimget('panel_width', [0.2, 0.2])
+        panel_width = vimget('panel_width', [0.25, 0.25])
         self.panel_width = [float(x) for x in panel_width]
         self.wincolor = vimget('wincolor', "'Normal'")
         self.sepchar = vimget('sepchar', "'│'")
