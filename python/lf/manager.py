@@ -4,12 +4,21 @@ from .option import lfopt
 from pathlib import Path
 
 
-def update(fun):
+def update_cursor(fun):
     def wrapper(*args, **kwargs):
         fun(*args, **kwargs)
         self = args[0]
         self._set_curpath()
         self._change_right()
+    return wrapper
+
+
+def update_info_path(fun):
+    def wrapper(*args, **kwargs):
+        fun(*args, **kwargs)
+        self = args[0]
+        middle = self.middle_panel
+        self.info_panel.info_path(middle.index, middle.text)
     return wrapper
 
 
@@ -34,6 +43,7 @@ class Manager(object):
         else:
             self.cwd = Path(cwd).resolve()
 
+    @update_info_path
     def _create(self):
         self.border_panel = BorderPanel()
         self.info_panel = InfoPanel()
@@ -62,6 +72,7 @@ class Manager(object):
             if action in break_list:
                 break
 
+    @update_info_path
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
@@ -71,6 +82,7 @@ class Manager(object):
         self.left_panel.backward()
         self._set_curpath()
 
+    @update_info_path
     def forward(self):
         if isinstance(self.right_panel, FilePanel):
             if not lfopt.auto_edit:
@@ -81,27 +93,33 @@ class Manager(object):
             self._set_curpath()
             self._change_right()
 
-    @update
+    @update_cursor
+    @update_info_path
     def down(self):
         self.middle_panel.move(down=True)
 
-    @update
+    @update_cursor
+    @update_info_path
     def up(self):
         self.middle_panel.move(down=False)
 
-    @update
+    @update_cursor
+    @update_info_path
     def top(self):
         self.middle_panel.jump(top=True)
 
-    @update
+    @update_cursor
+    @update_info_path
     def bottom(self):
         self.middle_panel.jump(top=False)
 
-    @update
+    @update_cursor
+    @update_info_path
     def scrollup(self):
         self.middle_panel.scroll(down=False)
 
-    @update
+    @update_cursor
+    @update_info_path
     def scrolldown(self):
         self.middle_panel.scroll(down=True)
 
@@ -146,6 +164,7 @@ class Manager(object):
     def quit(self):
         self._close()
 
+    @update_info_path
     def toggle_hidden(self):
         self.left_panel.toggle_hidden()
         self.middle_panel.toggle_hidden()

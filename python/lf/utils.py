@@ -40,6 +40,14 @@ def winexec(winid, cmd):
     vimcmd("call win_execute({}, '{}')".format(winid, cmd))
 
 
+def dplen(text):
+    return vimeval('strdisplaywidth("{}")'.format(text), 1)
+
+
+def bytelen(text):
+    return vimeval('len("{}")'.format(text), 1)
+
+
 def get_cwd():
     cwd = vimeval("fnamemodify(resolve(expand('%:p')), ':p:h')")
     use_root = vimget("use_root", 1) == '1'

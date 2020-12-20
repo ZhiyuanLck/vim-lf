@@ -1,4 +1,5 @@
-from .utils import vimeval, vimcmd, setlocal, winexec, vimget
+from .utils import vimeval, vimcmd
+from .utils import setlocal, winexec, dplen, bytelen
 from .text import Text
 from .option import lfopt
 from copy import copy
@@ -183,6 +184,26 @@ class InfoPanel(Panel):
         self.winid = vimeval("popup_create([], {})".format(lfopt.popup("info")))
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         self._set_wincolor()
+
+    def _settext(self, text):
+        vimcmd("call popup_settext({}, {})".format(self.winid, [text]))
+
+    def clear(self):
+        self._settext('')
+
+    def info_path(self, index, text_list):
+        if text_list == []:
+            self.clear()
+            return
+        path_str = str(text_list[index].path.resolve())
+        nr_str = "{}/{}".format(index + 1, len(text_list))
+        valid_len = self.winwidth - len(nr_str) - 1
+        if dplen(path_str) > valid_len:
+            path_str = path_str[:valid_len - 3] + '...'
+        blank = valid_len - dplen(path_str) + 1
+        info = path_str + blank * ' ' + nr_str
+        self._settext(info)
+
 
 class BorderPanel(Panel):
     def __init__(self):

@@ -1,4 +1,4 @@
-from .utils import vimeval
+from .utils import vimeval, dplen, bytelen
 from .option import lfopt
 
 
@@ -15,22 +15,16 @@ class Line(object):
     def _parse_type(self):
         self.is_hidden = self.path.name.startswith('.')
 
-    def _dplen(self, text):
-        return vimeval('strdisplaywidth("{}")'.format(text), 1)
-
-    def _bytelen(self, text):
-        return vimeval('len("{}")'.format(text), 1)
-
     def _set_text(self):
         start = len(str(self._cwd))
         if str(self._cwd)[-1] != '/':
             start += 1
         slash = '/' if self.path.is_dir() else ''
         text = str(self.path)[start:] + slash
-        rest = self._winwidth - self._dplen(text) % self._winwidth
+        rest = self._winwidth - dplen(text) % self._winwidth
         blank = ' ' * rest
         self.text = text + blank
-        self.bytelen = self._bytelen(self.text)
+        self.bytelen = bytelen(self.text)
 
     def _set_textline(self):
         opt = {"text": self.text}
