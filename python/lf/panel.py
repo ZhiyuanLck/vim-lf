@@ -44,11 +44,9 @@ class DirPanel(Panel):
         self._set_text()
 
     def _set_text(self):
-        self._filter()
-        text = Text(self)
-        self.text = text.text
-        self.text_prop = text.opt
-        vimcmd("call popup_settext({}, {})".format(self.winid, self.text_prop))
+        T = Text(self)
+        self.text = T.text
+        vimcmd("call popup_settext({}, {})".format(self.winid, T.props))
 
     def _cursorline(self):
         """
@@ -74,20 +72,20 @@ class DirPanel(Panel):
             self.index = self._len() - 1
 
     def _empty(self):
-        return self.path_list == []
+        return self.text == []
 
     def _index(self, item):
-        try:
-            self.index = self.path_list.index(item)
-        except ValueError:
+        find = False
+        for i, line in enumerate(self.text):
+            if line.path == item:
+                self.index = i
+                find = True
+                break
+        if not find:
             self.index = 0
 
-    def _filter(self):
-        if not self.show_hidden:
-            self.path_list = [p for p in self.path_list if not p.name.startswith('.')]
-
     def curpath(self):
-        return None if self._empty() else self.path_list[self.index]
+        return None if self._empty() else self.text[self.index].path
 
     def refresh(self):
         self._glob()
@@ -121,7 +119,7 @@ class DirPanel(Panel):
         return self.curpath()
 
     def _len(self):
-        return len(self.path_list)
+        return len(self.text)
 
     def jump(self, top=True):
         if not self._empty():
