@@ -55,6 +55,7 @@ action          | key
 - zip file and tar file
 - ui
   - info panel
+  - separator
   - devicon
 - selection mode
 
