@@ -32,6 +32,10 @@ def setlocal(winid, cmd):
     vimcmd("call win_execute({}, 'setlocal {}')".format(winid, cmd))
 
 
+def resetg(opt):
+    vimcmd("set {}<".format(opt))
+
+
 def winexec(winid, cmd):
     vimcmd("call win_execute({}, '{}')".format(winid, cmd))
 

@@ -1,4 +1,4 @@
-from .utils import vimeval, vimcmd
+from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel
 from .option import lfopt
 from pathlib import Path
@@ -106,10 +106,24 @@ class Manager(object):
         self.middle_panel.scroll(down=True)
 
     def _open(self, cmd):
-        if self.curpath.is_file():
-            self._close()
-            vimcmd("{} {}".format(cmd, self._cur_path()))
-            self.is_edit = True
+        if not self.curpath.is_file():
+            return
+        self._close()
+        vimcmd("{} {}".format(cmd, self._cur_path()))
+        self.is_edit = True
+        resetg("wrap")
+        resetg("buflisted")
+        resetg("buftype")
+        resetg("bufhidden")
+        resetg("number")
+        resetg("undolevels")
+        resetg("swapfile")
+        resetg("list")
+        resetg("relativenumber")
+        resetg("spell")
+        resetg("foldenable")
+        resetg("foldmethod")
+        resetg("signcolumn")
 
     def edit(self):
         self._open("edit")
