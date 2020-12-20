@@ -19,21 +19,39 @@ class Manager(object):
 
     def start(self, cwd):
         self.is_edit = False
-        self.cwd = Path(cwd).resolve()
+        self.is_cfile = False
+        self._resolve(cwd)
         vimcmd("set laststatus=0")
         vimcmd("set t_ve=")
         self._create()
         self._action()
 
+    def _resolve(self, cwd):
+        if cwd == '.':
+            self.is_cfile = True
+            self.cwd = Path(vimeval("expand('%:p:h')")).resolve()
+            self.cfile = Path(vimeval("expand('%:p')")).resolve()
+        else:
+            self.cwd = Path(cwd).resolve()
+
     def _create(self):
         self.border_panel = BorderPanel()
         self.info_panel = InfoPanel()
-        self._set_middle()
-        self._set_left()
-        self.middle_panel.refresh()
-        self.left_panel.backward()
+        self._init_middle()
+        self._init_left()
         self._set_curpath()
         self._change_right(True)
+
+    def _init_left(self):
+        self.left_panel = DirPanel(self.cwd, 0, self.info_panel)
+        self.left_panel.backward()
+
+    def _init_middle(self):
+        self.middle_panel = DirPanel(self.cwd, 1, self.info_panel)
+        self.middle_panel.refresh()
+        if self.is_cfile:
+            self.middle_panel._index(self.cfile)
+            self.middle_panel._cursorline()
 
     def _action(self):
         break_list = ['edit', 'quit']
@@ -131,12 +149,6 @@ class Manager(object):
 
     def _set_curpath(self):
         self.curpath = self.middle_panel.curpath()
-
-    def _set_left(self):
-        self.left_panel = DirPanel(self.cwd, 0, self.info_panel)
-
-    def _set_middle(self):
-        self.middle_panel = DirPanel(self.cwd, 1, self.info_panel)
 
     def _show_dir(self):
         if self.curpath is None:

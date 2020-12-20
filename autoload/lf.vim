@@ -10,7 +10,13 @@ from lf.manager import *
 END
 
 function! lf#start(cwd) abort
-  let cwd = a:cwd == '<root>' ? '<root>' : a:cwd->fnamemodify(':p')->resolve()
+  if a:cwd == '<root>'
+    let cwd = '<root>'
+  elseif a:cwd == '.'
+    let cwd = '.'
+  else
+    let cwd = a:cwd->fnamemodify(':p')
+  endif
   exec g:vlf_py printf("vlf_manager.start('%s')", cwd)
 endfunction
 
