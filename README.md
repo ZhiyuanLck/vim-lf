@@ -1,6 +1,10 @@
 # Preview version of vim-lf
 
-vim-lf is a ranger-like/lf-like file explorer in vim popup. Call it simply by `:Lf <path>`.
+vim-lf is a ranger-like/lf-like file explorer in vim popup. Call it simply by `:Lf <path>`, for example:
+```vim
+:Lf . " open current directory
+:Lf ~ " open home directory
+```
 
 Project is in **preview**, which means:
 - Support only basic features.
