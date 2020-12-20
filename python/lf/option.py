@@ -3,9 +3,7 @@ from copy import copy
 
 
 class Popup(object):
-    def __init__(self, width, height, col, line, zindex=10, padding=True, border=False):
-        padding = vimget('padding', [0, 0, 0, 0])
-        padding = [int(x) for x in padding]
+    def __init__(self, width, height, col, line, padding, zindex=10, border=False):
         self.opt = {
                 "pos":       "topleft",
                 "border":    [0, 0, 0, 0],
@@ -14,8 +12,6 @@ class Popup(object):
                 "mapping":   0,
                 "scrollbar": 0,
                 }
-        if not padding:
-            self.no_padding()
         if border:
             self.set_border()
         self._parse_border()
@@ -66,9 +62,6 @@ class Popup(object):
         self.opt["borderchars"] = borderchars
         self.opt["borderhighlight"] = ["vlf_hl_border"]
 
-    def no_padding(self):
-        self.opt["padding"] = [0, 0, 0, 0]
-
 
 class Option(object):
     def __init__(self):
@@ -92,8 +85,10 @@ class Option(object):
         self.panel_width = [float(x) for x in panel_width]
         self.wincolor = vimget('wincolor', "'Normal'")
         self.sepchar = vimget('sepchar', "'│'")
-        padding = vimget('padding', [0, 0, 0, 0])
-        self.padding = [int(x) for x in padding]
+        inner_padding = vimget('inner_padding', [0, 0, 0, 0])
+        self.inner_padding = [int(x) for x in inner_padding]
+        outer_padding = vimget('outer_padding', [0, 0, 0, 0])
+        self.outer_padding = [int(x) for x in outer_padding]
         border = vimget('border', [1, 1, 1, 1])
         self.border = [int(x) for x in border]
         self.min_width = 80
@@ -129,7 +124,7 @@ class Option(object):
         self.popup_border = Popup(width = width, height = height,
                 col = (self.columns - width) // 2 + 1,
                 line = (self.lines - height) // 2 + 1,
-                zindex = 1, padding = False, border = True,
+                padding = self.outer_padding, zindex = 1, border = True,
                 )
         self.inner_width = self.popup_border.width
         self.inner_height = self.popup_border.height - 1
@@ -138,6 +133,7 @@ class Option(object):
         width = self._real(self.min_dir_width, self.panel_width[0], self.inner_width)
         self.popup_left = Popup(width, self.inner_height,
                 *self.popup_border.shifted_anchor(),
+                padding = self.inner_padding
                 )
 
     def _middle_opt(self):
@@ -145,7 +141,8 @@ class Option(object):
         self.popup_middle = Popup(width = width,
                 height = self.inner_height,
                 col = self.popup_left.col + self.popup_left.win_width + 1, # + sep
-                line = self.popup_left.line
+                line = self.popup_left.line,
+                padding = self.inner_padding
                 )
 
     def _right_opt(self):
@@ -153,7 +150,8 @@ class Option(object):
         self.popup_right = Popup(width = width,
                 height = self.inner_height,
                 col = self.popup_middle.col + self.popup_middle.win_width + 1, # + sep
-                line = self.popup_left.line
+                line = self.popup_left.line,
+                padding = self.inner_padding
                 )
 
     def _info_opt(self):
@@ -161,16 +159,19 @@ class Option(object):
                 height = 1,
                 col = self.popup_left.col,
                 line = self.popup_left.line + self.popup_left.win_height,
+                padding = self.inner_padding
                 )
 
     def _sep_opt(self):
         self.popup_sep_a = Popup(width=1, height=self.inner_height,
                 col = self.popup_middle.col - 1,
-                line = self.popup_left.line
+                line = self.popup_left.line,
+                padding = [0, 0, 0, 0]
                 )
         self.popup_sep_b = Popup(width=1, height=self.inner_height,
                 col = self.popup_right.col - 1,
-                line = self.popup_left.line
+                line = self.popup_left.line,
+                padding = [0, 0, 0, 0]
                 )
 
 

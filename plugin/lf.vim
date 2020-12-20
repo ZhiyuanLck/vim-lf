@@ -13,7 +13,8 @@ call s:init_var("panel_width", [0.2, 0.2])
 call s:init_var("borderchars", ['─', '│', '─', '│', '┌', '┐', '┘', '└'])
 call s:init_var("sepchar", '│')
 call s:init_var("wincolor", 'Normal')
-call s:init_var("padding", [0, 0, 0, 0])
+call s:init_var("inner_padding", [0, 0, 0, 0])
+call s:init_var("outer_padding", [0, 1, 0, 1])
 call s:init_var("border", [1, 1, 1, 1])
 
 let g:vlf_mapping = {}
