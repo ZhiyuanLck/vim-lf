@@ -36,7 +36,7 @@ class DirPanel(Panel):
             opt = lfopt.popup("right")
         self.winid = vimeval("popup_create([], {})".format(opt))
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
-        vimcmd("call lf#colorscheme#prop({})".format(self.bufnr))
+        vimcmd("call lf#colorscheme#path_prop({})".format(self.bufnr))
         self._set_wincolor()
 
     def _glob(self):
@@ -192,8 +192,10 @@ class FilePanel(Panel):
 class InfoPanel(Panel):
     def __init__(self, manager):
         self.winid = vimeval("popup_create([], {})".format(lfopt.popup("info")))
+        self.bufnr = vimeval("winbufnr({})".format(self.winid))
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         self._set_wincolor()
+        vimcmd("call lf#colorscheme#info_prop({})".format(self.bufnr))
         self.manager = manager
 
     def _set_panel(self):
@@ -206,7 +208,7 @@ class InfoPanel(Panel):
         self.total = len(self.text_list)
 
     def _settext(self, text):
-        vimcmd("call popup_settext({}, {})".format(self.winid, [text]))
+        vimcmd("call popup_settext({}, {})".format(self.winid, text))
 
     def clear(self):
         self._settext('')
@@ -216,13 +218,34 @@ class InfoPanel(Panel):
         if self.text_list == []:
             self.clear()
             return
-        self._set_st()
+        self._set_sz()
         self._set_nr()
         self._set_path()
-        info = self.path_str + self.sz + self.nr
-        self._settext(info)
+        self.info = self.path_str_fill + self.sz + self.nr
+        self._settext_path()
+        #  self._settext([info])
 
-    def _set_st(self):
+    def _settext_path(self):
+        opt = {"text": self.info}
+        prop_path = {
+                "col": 1,
+                "length": bytelen(self.path_str),
+                "type": "path",
+                }
+        prop_size = {
+                "col": self.winwidth - len(self.sz) - len(self.nr) + 1,
+                "length": len(self.sz),
+                "type": "size",
+                }
+        prop_nr = {
+                "col": self.winwidth - len(self.nr) + 1,
+                "length": len(self.nr),
+                "type": "nr",
+                }
+        opt["props"] = [prop_path, prop_size, prop_nr]
+        self._settext([opt])
+
+    def _set_sz(self):
         self.sz = ''
         if self.path.is_file():
             sz = self.path.stat().st_size
@@ -252,7 +275,8 @@ class InfoPanel(Panel):
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 4] + '... '
         blank = valid_len - dplen(path_str)
-        self.path_str = path_str + blank * ' '
+        self.path_str = path_str
+        self.path_str_fill = path_str + blank * ' '
 
 
 class BorderPanel(Panel):

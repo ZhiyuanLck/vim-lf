@@ -37,6 +37,18 @@ let s:default_highlights = {
       \   ctermfg : "48",
       \   guifg : "#343d46",
       \   },
+      \ "vlf_hl_info_path": #{
+      \   ctermfg : "255",
+      \   },
+      \ "vlf_hl_info_size": #{
+      \   ctermfg : "223",
+      \   ctermbg : "239",
+      \   },
+      \ "vlf_hl_info_nr": #{
+      \   ctermfg : "255",
+      \   ctermbg : "239",
+      \   cterm: "bold",
+      \   },
       \ }
 let s:base_prop = ["dir", "hidden_dir", "file", "hidden_file"]
 let s:extra_prop_patterns = #{}
@@ -53,10 +65,17 @@ function! lf#colorscheme#highlight() abort
   endfor
 endfunction
 
-function! lf#colorscheme#prop(bufnr) abort
+function! lf#colorscheme#path_prop(bufnr) abort
   for prop in s:base_prop
     let hl = "vlf_hl_".prop
     call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
   endfor
   call prop_type_add("cursorline", #{bufnr: a:bufnr, highlight: hl})
+endfunction
+
+function! lf#colorscheme#info_prop(bufnr) abort
+  for prop in ["size", "nr", "path"]
+    let hl = "vlf_hl_info_".prop
+    call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
+  endfor
 endfunction
