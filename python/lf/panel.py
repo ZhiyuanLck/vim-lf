@@ -211,16 +211,34 @@ class InfoPanel(Panel):
         self._set_panel()
         index = self.middle.index
         text_list = self.middle.text
+        path = text_list[index].path.resolve()
         if text_list == []:
             self.clear()
             return
+        # file size
+        sz = ''
+        if path.is_file():
+            sz = path.stat().st_size
+            if sz < 2 ** 10:
+                unit = 'B'
+            elif sz < 2 ** 20:
+                unit = 'KB'
+                sz >>= 10
+            elif sz < 2 ** 30:
+                unit = 'MB'
+                sz >>= 20
+            else:
+                unit = 'GB'
+                sz >>= 30
+            sz = " {} {} ".format(sz, unit)
+        # lines of a file or directory
         if isinstance(self.right, DirPanel):
             lines = len(self.right.text)
         elif isinstance(self.right, FilePanel):
             lines = self.right.lines
-        nr_str = "{}/{}:{}".format(index + 1, len(text_list), lines)
+        nr_str = "{}{}/{}:{}".format(sz, index + 1, len(text_list), lines)
         valid_len = self.winwidth - len(nr_str) - 1
-        path_str = str(text_list[index].path.resolve())
+        path_str = str(path)
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 3] + '...'
         blank = valid_len - dplen(path_str) + 1
