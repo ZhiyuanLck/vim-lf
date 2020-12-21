@@ -1,7 +1,24 @@
+from pathlib import Path
+from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .option import lfopt
-from pathlib import Path
+
+
+def _update(fun, ignore):
+    @wraps(fun)
+    def wrapper(*args, **kwargs):
+        fun(*args, **kwargs)
+        self = args[0]
+        if not ignore:
+            self._set_curpath()
+            self._change_right()
+        self.info_panel.info_path()
+    return wrapper
+
+
+update_all = partial(_update, ignore=False)
+update_info = partial(_update, ignore=True)
 
 
 def update_cursor(fun):
@@ -41,7 +58,7 @@ class Manager(object):
         else:
             self.cwd = Path(cwd).resolve()
 
-    @update_info_path
+    @update_info
     def _create(self):
         self.border_panel = BorderPanel()
         self._init_middle()
@@ -56,7 +73,7 @@ class Manager(object):
 
     def _init_middle(self):
         self.middle_panel = DirPanel(self.cwd, 1)
-        self.middle_panel.refresh()
+        self.middle_panel.refresh(keep_pos=False)
         if self.is_cfile:
             self.middle_panel._index(self.cfile)
             self.middle_panel._cursorline()
@@ -70,7 +87,7 @@ class Manager(object):
             if action in break_list:
                 break
 
-    @update_info_path
+    @update_info
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
@@ -80,7 +97,7 @@ class Manager(object):
         self.left_panel.backward()
         self._set_curpath()
 
-    @update_info_path
+    @update_info
     def forward(self):
         if isinstance(self.right_panel, FilePanel):
             if not lfopt.auto_edit:
@@ -91,41 +108,35 @@ class Manager(object):
             self._set_curpath()
             self._change_right()
 
-    @update_info_path
-    @update_cursor
+    @update_all
     def down(self):
         self.middle_panel.move(down=True)
 
-    @update_info_path
-    @update_cursor
+    @update_all
     def up(self):
         self.middle_panel.move(down=False)
 
-    @update_info_path
-    @update_cursor
+    @update_all
     def top(self):
         self.middle_panel.jump(top=True)
 
-    @update_info_path
-    @update_cursor
+    @update_all
     def bottom(self):
         self.middle_panel.jump(top=False)
 
-    @update_info_path
-    @update_cursor
+    @update_all
     def scrollup(self):
         self.middle_panel.scroll(down=False)
 
-    @update_info_path
-    @update_cursor
+    @update_all
     def scrolldown(self):
         self.middle_panel.scroll(down=True)
 
+    @update_all
     def touch(self):
-        pass
         self.cli = CliPanel("FileName: ")
         self.cli.input()
-        #  self.middle_panel.touch(input.text)
+        self.middle_panel.touch(self.cli.cmd)
 
     def _open(self, cmd):
         if not self.curpath.is_file():
@@ -198,7 +209,7 @@ class Manager(object):
         if self._show_dir():
             self.right_panel = DirPanel(self.curpath, 2)
             if self.curpath is not None:
-                self.right_panel.refresh()
+                self.right_panel.refresh(keep_pos=False)
         else:
             self.right_panel = FilePanel(self.curpath)
 
