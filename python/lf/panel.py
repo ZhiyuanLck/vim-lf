@@ -242,7 +242,7 @@ class InfoPanel(Panel):
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 3] + '...'
         blank = valid_len - dplen(path_str) + 1
-        info = path_str + blank * ' ' + nr_str
+        info = path_str + blank * ' ' + sz + nr_str
         self._settext(info)
 
 
