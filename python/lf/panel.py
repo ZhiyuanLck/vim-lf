@@ -360,7 +360,7 @@ class CliPanel(_InfoPanel):
         self.pos += 1
 
     @update
-    def back(self):
+    def delete(self):
         if self._empty():
             return
         self.cmd = self.cmd[:self.pos - 1] + self._tail()
