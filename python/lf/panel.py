@@ -236,9 +236,9 @@ class InfoPanel(Panel):
             lines = len(self.right.text)
         elif isinstance(self.right, FilePanel):
             lines = self.right.lines
-        nr_str = "{}{}/{}:{}".format(sz, index + 1, len(text_list), lines)
-        valid_len = self.winwidth - len(nr_str) - 1
-        path_str = str(path)
+        nr_str = " {}/{}:{} ".format(index + 1, len(text_list), lines)
+        valid_len = self.winwidth - len(nr_str) - len(sz) - 1
+        path_str = " {} ".format(str(path))
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 3] + '...'
         blank = valid_len - dplen(path_str) + 1

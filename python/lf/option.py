@@ -14,19 +14,31 @@ class Popup(object):
                 }
         if border:
             self.set_border()
-        self._parse_border()
-        self.set_width(width)
-        self.set_height(height)
+        self._parse_size(width, height)
+        #  self.set_width(width)
+        #  self.set_height(height)
         self.set_zindex(zindex)
         self.set_anchor(col, line)
 
-    def _parse_border(self):
+    def _parse_size(self, width, height):
         pad = self.opt["padding"]
         bor = self.opt["border"]
-        self.minus_width = pad[1] + pad[3] + bor[1] + bor[3]
-        self.minus_height = pad[0] + pad[2] + bor[0] + bor[2]
+        self.win_width = width
+        self.win_height = height
+        self.inner_width = width - bor[1] - bor[3]
+        self.inner_height = height - bor[0] - bor[2]
+        minus_width = pad[1] + pad[3] + bor[1] + bor[3]
+        minus_height = pad[0] + pad[2] + bor[0] + bor[2]
         self.offset_col = pad[3] + bor[3]
         self.offset_line = pad[0] + bor[0]
+        width -= minus_width
+        self.opt["maxwidth"] = width
+        self.opt["minwidth"] = width
+        self.width = width
+        height -= minus_height
+        self.opt["maxheight"] = height
+        self.opt["minheight"] = height
+        self.height = height
 
     def shifted_anchor(self):
         return self.col + self.offset_col, self.line + self.offset_line
@@ -36,20 +48,6 @@ class Popup(object):
         self.opt["line"] = line
         self.col = col
         self.line = line
-
-    def set_width(self, width):
-        self.win_width = width
-        width -= self.minus_width
-        self.opt["maxwidth"] = width
-        self.opt["minwidth"] = width
-        self.width = width
-
-    def set_height(self, height):
-        self.win_height = height
-        height -= self.minus_height
-        self.opt["maxheight"] = height
-        self.opt["minheight"] = height
-        self.height = height
 
     def set_zindex(self, zindex):
         self.opt["zindex"] = zindex
@@ -155,11 +153,11 @@ class Option(object):
                 )
 
     def _info_opt(self):
-        self.popup_info = Popup(width = self.popup_border.width,
+        self.popup_info = Popup(width = self.popup_border.inner_width,
                 height = 1,
-                col = self.popup_left.col,
+                col = self.popup_border.col + 1,
                 line = self.popup_left.line + self.popup_left.win_height,
-                padding = self.inner_padding
+                padding = [0, 0, 0, 0]
                 )
 
     def _sep_opt(self):
