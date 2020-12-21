@@ -70,7 +70,7 @@ function! s:init_cli(action, key) abort
 endfunction
 
 call s:init_cli("done", "\<cr>")
-call s:init_cli("back", ["\<c-h>", "\<bs>"])
+call s:init_cli("back", ["\<bs>"])
 call s:init_cli("left", ["\<left>", "\<c-h>"])
 call s:init_cli("right", ["\<right>", "\<c-l>"])
 call s:init_cli("clear", "\<c-u>")

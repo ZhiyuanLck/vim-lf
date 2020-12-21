@@ -33,7 +33,7 @@ function! lf#cli() abort
   redraw
   let nr = getchar()
   let ch = type(nr) ? nr : nr2char(nr)
-  let action = get(g:vlf_mapping_cli, ch, 'skip')
-  exec g:vlf_py printf("vlf_manager.info_panel.%s()", action)
+  let action = get(g:vlf_mapping_cli, ch, 'add')
+  exec g:vlf_py printf("vlf_manager.cli.%s()", action)
   return action
 endfunction

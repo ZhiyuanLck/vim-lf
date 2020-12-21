@@ -49,12 +49,13 @@ let s:default_highlights = {
       \   ctermbg : "239",
       \   cterm: "bold",
       \   },
-      \ "vlf_hl_input_prompt": #{
+      \ "vlf_hl_cli_prompt": #{
       \   ctermfg : "255",
       \   cterm: "bold",
       \   },
-      \ "vlf_hl_input_cursor": #{
-      \   ctermbg : "255",
+      \ "vlf_hl_cli_cursor": #{
+      \   ctermbg : "249",
+      \   ctermfg : "0",
       \   },
       \ }
 let s:base_prop = ["dir", "hidden_dir", "file", "hidden_file"]
@@ -87,9 +88,9 @@ function! lf#colorscheme#info_prop(bufnr) abort
   endfor
 endfunction
 
-function! lf#colorscheme#input_prop(bufnr) abort
+function! lf#colorscheme#cli_prop(bufnr) abort
   for prop in ["prompt", "cursor"]
-    let hl = "vlf_hl_input_".prop
+    let hl = "vlf_hl_cli_".prop
     call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
   endfor
 endfunction

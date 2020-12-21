@@ -103,7 +103,7 @@ class Option(object):
         self._middle_opt()
         self._right_opt()
         self._info_opt()
-        self._input_opt()
+        self._cli_opt()
         self._sep_opt()
 
     def popup(self, name):
@@ -167,8 +167,8 @@ class Option(object):
                 padding = [0, 0, 0, 0], zindex = self.zindex["info"],
                 )
 
-    def _input_opt(self):
-        self.popup_input = Popup(width = self.popup_border.inner_width,
+    def _cli_opt(self):
+        self.popup_cli = Popup(width = self.popup_border.inner_width,
                 height = 1,
                 col = self.popup_border.col + 1,
                 line = self.popup_left.line + self.popup_left.win_height,

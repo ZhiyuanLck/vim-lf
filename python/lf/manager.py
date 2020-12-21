@@ -1,5 +1,5 @@
 from .utils import vimeval, vimcmd, resetg
-from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, InputPanel
+from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .option import lfopt
 from pathlib import Path
 
@@ -122,7 +122,9 @@ class Manager(object):
         self.middle_panel.scroll(down=True)
 
     def touch(self):
-        input = InputPanel("FileName")
+        pass
+        self.cli = CliPanel("FileName: ")
+        self.cli.input()
         #  self.middle_panel.touch(input.text)
 
     def _open(self, cmd):

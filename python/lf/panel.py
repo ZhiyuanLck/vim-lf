@@ -293,71 +293,101 @@ def update(fun):
     def wrapper(*args, **kwargs):
         fun(*args, **kwargs)
         self = args[0]
-        self._update()
         self._settext_input()
     return wrapper
 
 
-class InputPanel(_InfoPanel):
+class CliPanel(_InfoPanel):
     def __init__(self, prompt):
-        super().__init__("input")
-        self.prompt = prompt + ': '
-        self.out = ''
-        self._update()
-        self.pos = bytelen(self.text) + 1
-        self._input()
-
-    def _update(self):
-        self.text = self.prompt + self.out
-
-    def _incr(self):
-        self.pos += 1
+        super().__init__("cli")
+        self.prompt = prompt
+        self.cmd = ''
+        self.pos = 0  # number of chars before cursor
+        self._settext_input()
 
     def _settext_input(self):
-        opt = {"text": self.text + ' '}
+        text = self.prompt + self.cmd + ' '
+        prompt_len = bytelen(self.prompt)
+        cmd_len = bytelen(self.cmd[:self.pos])
+        opt = {"text": text}
         prop_prompt = {
                 "col": 1,
-                "length": bytelen(self.prompt),
+                "length": prompt_len,
                 "type": "prompt",
                 }
         prop_cursor = {
-                "col": self.pos,
-                "length": 1,
+                "col": prompt_len + cmd_len + 1,
+                "length": self._curlen(),
                 "type": "cursor",
                 }
         opt["props"] = [prop_prompt, prop_cursor]
         self._settext([opt])
 
-    def _input(self):
-        self._settext_input()
+    def input(self):
         while 1:
-            vimcmd("redraw")
-            vimcmd("let nr = getchar()")
-            vimcmd("let ch = type(nr) ? nr : nr2char(nr)")
-            if vimeval('ch == "\\<cr>"') == '1':
-                self.close()
+            action = vimeval("lf#cli()")
+            if action == 'done':
                 break
-            elif vimeval('ch == "\\<c-h>" || ch == "\\<bs>"') == '1':
-                self._back()
-            #  if vimeval('ch == "\\<cr>"') == '1':
-            elif vimeval('type(ch) == 0'):
-                self._add(vimeval('ch'))
 
     def _empty(self):
-        return self.out == ''
+        return self.cmd == ''
+
+    def _at_end(self):
+        return self.pos == len(self.cmd)
+
+    def _head(self):
+        return self.cmd[:self.pos]
+
+    def _tail(self):
+        if self._at_end():
+            return ''
+        return self.cmd[self.pos:]
+
+    def _curlen(self):
+        if self._at_end():
+            return 1
+        return bytelen(self.cmd[self.pos])
 
     @update
-    def _add(self, char):
-        self.out += char
-        self.pos += bytelen(char)
+    def clear(self):
+        self.cmd = ''
+        self.pos = 0
 
     @update
-    def _back(self):
+    def add(self):
+        char = vimeval("ch")
+        self.cmd = self._head() + char + self._tail()
+        self.pos += 1
+
+    @update
+    def back(self):
         if self._empty():
             return
-        char = self.out[-1]
-        self.out = self.out[:-1]
-        self.pos -= bytelen(char)
+        self.cmd = self.cmd[:self.pos - 1] + self._tail()
+        self.pos -= 1
+
+    @update
+    def left(self):
+        if self._empty():
+            return
+        self.pos -= 1
+
+    @update
+    def right(self):
+        if self._at_end():
+            return
+        self.pos += 1
+
+    @update
+    def go_start(self):
+        self.pos = 0
+
+    @update
+    def go_end(self):
+        self.pos = len(self.cmd)
+
+    def done(self):
+        self.close()
 
 
 class BorderPanel(Panel):
