@@ -141,6 +141,10 @@ class DirPanel(Panel):
         self._index(item)
         self._cursorline()
 
+    def touch(self, name: str):
+        file = self.cwd / name
+        file.touch()
+
 
 class FilePanel(Panel):
     def __init__(self, path):
@@ -165,19 +169,19 @@ class FilePanel(Panel):
 
     def _set_option(self):
         winid = self.winid
-        setlocal(winid, "wrap")
-        setlocal(winid, "nobuflisted")
-        setlocal(winid, "buftype=nowrite")
-        setlocal(winid, "bufhidden=hide")
-        setlocal(winid, "number")
-        setlocal(winid, "undolevels=-1")
-        setlocal(winid, "noswapfile")
-        setlocal(winid, "nolist")
-        setlocal(winid, "norelativenumber")
-        setlocal(winid, "nospell")
-        setlocal(winid, "nofoldenable")
-        setlocal(winid, "foldmethod=manual")
-        setlocal(winid, "signcolumn=no")
+        #  setlocal(winid, "wrap")
+        #  setlocal(winid, "nobuflisted")
+        #  setlocal(winid, "buftype=nowrite")
+        #  setlocal(winid, "bufhidden=hide")
+        #  setlocal(winid, "number")
+        #  setlocal(winid, "undolevels=-1")
+        #  setlocal(winid, "noswapfile")
+        #  setlocal(winid, "nolist")
+        #  setlocal(winid, "norelativenumber")
+        #  setlocal(winid, "nospell")
+        #  setlocal(winid, "nofoldenable")
+        #  setlocal(winid, "foldmethod=manual")
+        #  setlocal(winid, "signcolumn=no")
         if self.path.stat().st_size < lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
@@ -189,13 +193,25 @@ class FilePanel(Panel):
             vimcmd("bwipeout {}".format(self.bufnr))
 
 
-class InfoPanel(Panel):
-    def __init__(self, manager):
-        self.winid = vimeval("popup_create([], {})".format(lfopt.popup("info")))
+class _InfoPanel(Panel):
+    def __init__(self, name, has_prop=True):
+        self.winid = vimeval("popup_create([], {})".format(lfopt.popup(name)))
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         self._set_wincolor()
-        vimcmd("call lf#colorscheme#info_prop({})".format(self.bufnr))
+        if has_prop:
+            vimcmd("call lf#colorscheme#{}_prop({})".format(name, self.bufnr))
+
+    def _settext(self, text):
+        vimcmd("call popup_settext({}, {})".format(self.winid, text))
+
+    def clear(self):
+        self._settext('')
+
+
+class InfoPanel(_InfoPanel):
+    def __init__(self, manager):
+        super().__init__("info")
         self.manager = manager
 
     def _set_panel(self):
@@ -206,12 +222,6 @@ class InfoPanel(Panel):
         self.text_list = self.middle.text
         self.path = self.text_list[self.index].path.resolve()
         self.total = len(self.text_list)
-
-    def _settext(self, text):
-        vimcmd("call popup_settext({}, {})".format(self.winid, text))
-
-    def clear(self):
-        self._settext('')
 
     def info_path(self):
         self._set_panel()
@@ -277,6 +287,77 @@ class InfoPanel(Panel):
         blank = valid_len - dplen(path_str)
         self.path_str = path_str
         self.path_str_fill = path_str + blank * ' '
+
+
+def update(fun):
+    def wrapper(*args, **kwargs):
+        fun(*args, **kwargs)
+        self = args[0]
+        self._update()
+        self._settext_input()
+    return wrapper
+
+
+class InputPanel(_InfoPanel):
+    def __init__(self, prompt):
+        super().__init__("input")
+        self.prompt = prompt + ': '
+        self.out = ''
+        self._update()
+        self.pos = bytelen(self.text) + 1
+        self._input()
+
+    def _update(self):
+        self.text = self.prompt + self.out
+
+    def _incr(self):
+        self.pos += 1
+
+    def _settext_input(self):
+        opt = {"text": self.text + ' '}
+        prop_prompt = {
+                "col": 1,
+                "length": bytelen(self.prompt),
+                "type": "prompt",
+                }
+        prop_cursor = {
+                "col": self.pos,
+                "length": 1,
+                "type": "cursor",
+                }
+        opt["props"] = [prop_prompt, prop_cursor]
+        self._settext([opt])
+
+    def _input(self):
+        self._settext_input()
+        while 1:
+            vimcmd("redraw")
+            vimcmd("let nr = getchar()")
+            vimcmd("let ch = type(nr) ? nr : nr2char(nr)")
+            if vimeval('ch == "\\<cr>"') == '1':
+                self.close()
+                break
+            elif vimeval('ch == "\\<c-h>" || ch == "\\<bs>"') == '1':
+                self._back()
+            #  if vimeval('ch == "\\<cr>"') == '1':
+            elif vimeval('type(ch) == 0'):
+                self._add(vimeval('ch'))
+
+    def _empty(self):
+        return self.out == ''
+
+    @update
+    def _add(self, char):
+        self.out += char
+        self.pos += bytelen(char)
+
+    @update
+    def _back(self):
+        if self._empty():
+            return
+        char = self.out[-1]
+        self.out = self.out[:-1]
+        self.pos -= bytelen(char)
 
 
 class BorderPanel(Panel):

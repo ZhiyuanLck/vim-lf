@@ -93,11 +93,17 @@ class Option(object):
         self.min_height = 10
         self.min_dir_width = 20
         self.min_file_width = 40
+        self.zindex = {"border": 1,
+                "main:": 10,
+                "info": 20,
+                "input": 30,
+                }
         self._border_opt()
         self._left_opt()
         self._middle_opt()
         self._right_opt()
         self._info_opt()
+        self._input_opt()
         self._sep_opt()
 
     def popup(self, name):
@@ -122,7 +128,8 @@ class Option(object):
         self.popup_border = Popup(width = width, height = height,
                 col = (self.columns - width) // 2 + 1,
                 line = (self.lines - height) // 2 + 1,
-                padding = self.outer_padding, zindex = 1, border = True,
+                padding = self.outer_padding,
+                zindex = self.zindex["border"], border = True,
                 )
         self.inner_width = self.popup_border.width
         self.inner_height = self.popup_border.height - 1
@@ -157,7 +164,15 @@ class Option(object):
                 height = 1,
                 col = self.popup_border.col + 1,
                 line = self.popup_left.line + self.popup_left.win_height,
-                padding = [0, 0, 0, 0]
+                padding = [0, 0, 0, 0], zindex = self.zindex["info"],
+                )
+
+    def _input_opt(self):
+        self.popup_input = Popup(width = self.popup_border.inner_width,
+                height = 1,
+                col = self.popup_border.col + 1,
+                line = self.popup_left.line + self.popup_left.win_height,
+                padding = [0, 0, 0, 0], zindex = self.zindex["input"],
                 )
 
     def _sep_opt(self):
