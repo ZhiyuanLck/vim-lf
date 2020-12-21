@@ -45,7 +45,7 @@ action          | key
 `open_bottom`   | `"J"`
 `open_left`     | `"H"`
 `open_right`    | `"L"`
-`open_tab`      | `"t"`
+`open_tab`      | `"n"`
 `quit`          | `"q"`
 
 ## Actions to be supported
