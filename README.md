@@ -56,10 +56,10 @@ action          | key
   - filter directory
   - filter file
   - filter file with the same extension
-- MRU directory
+- MRU directory/file
+- Open manager through file under cursor
 - zip file and tar file
 - ui
-  - info panel
   - separator
   - devicon
 - selection mode
