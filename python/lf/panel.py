@@ -1,8 +1,8 @@
+from copy import copy
 from .utils import vimeval, vimcmd
 from .utils import setlocal, winexec, dplen, bytelen
 from .text import Text
 from .option import lfopt
-from copy import copy
 
 
 class Panel(object):
@@ -14,10 +14,9 @@ class Panel(object):
 
 
 class DirPanel(Panel):
-    def __init__(self, cwd, number, info_panel):
+    def __init__(self, cwd, number):
         self.cwd = cwd.resolve()
         self.number = number
-        self.info_panel = info_panel
         self.index = 0
         self.cursorline_id = None
         self.text = None
@@ -145,15 +144,26 @@ class DirPanel(Panel):
 
 class FilePanel(Panel):
     def __init__(self, path):
-        path = path.resolve()
+        self.path = path.resolve()
+        self._create()
+        self._linenr()
+        self._set_option()
+
+    def _create(self):
         opt = lfopt.popup("right")
-        self.buf_exist = vimeval("bufexists('{}') == v:true".format(path)) == '1'
+        self.buf_exist = vimeval("bufexists('{}') == v:true".format(self.path)) == '1'
         if self.buf_exist:
-            vimcmd("noautocmd silent let winid = bufnr('{}')->popup_create({})".format(path, opt))
+            vimcmd("noautocmd silent let winid = bufnr('{}')->popup_create({})".format(self.path, opt))
             self.winid = vimeval("winid")
         else:
-            vimcmd("noautocmd silent let winid = '{}'->bufadd()->popup_create({})".format(path, opt))
+            vimcmd("noautocmd silent let winid = '{}'->bufadd()->popup_create({})".format(self.path, opt))
             self.winid = vimeval("winid")
+
+    def _linenr(self):
+        winexec(self.winid, "let _lines = line('$')")
+        self.lines = vimeval("_lines", 1)
+
+    def _set_option(self):
         winid = self.winid
         setlocal(winid, "wrap")
         setlocal(winid, "nobuflisted")
@@ -168,7 +178,7 @@ class FilePanel(Panel):
         setlocal(winid, "nofoldenable")
         setlocal(winid, "foldmethod=manual")
         setlocal(winid, "signcolumn=no")
-        if path.stat().st_size < lfopt.max_file_size:
+        if self.path.stat().st_size < lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         self._set_wincolor()
@@ -180,10 +190,16 @@ class FilePanel(Panel):
 
 
 class InfoPanel(Panel):
-    def __init__(self):
+    def __init__(self, manager):
         self.winid = vimeval("popup_create([], {})".format(lfopt.popup("info")))
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         self._set_wincolor()
+        self.manager = manager
+
+    def _set_panel(self):
+        self.left = self.manager.left_panel
+        self.middle = self.manager.middle_panel
+        self.right = self.manager.right_panel
 
     def _settext(self, text):
         vimcmd("call popup_settext({}, {})".format(self.winid, [text]))
@@ -191,13 +207,20 @@ class InfoPanel(Panel):
     def clear(self):
         self._settext('')
 
-    def info_path(self, index, text_list):
+    def info_path(self):
+        self._set_panel()
+        index = self.middle.index
+        text_list = self.middle.text
         if text_list == []:
             self.clear()
             return
-        path_str = str(text_list[index].path.resolve())
-        nr_str = "{}/{}".format(index + 1, len(text_list))
+        if isinstance(self.right, DirPanel):
+            lines = len(self.right.text)
+        elif isinstance(self.right, FilePanel):
+            lines = self.right.lines
+        nr_str = "{}/{}:{}".format(index + 1, len(text_list), lines)
         valid_len = self.winwidth - len(nr_str) - 1
+        path_str = str(text_list[index].path.resolve())
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 3] + '...'
         blank = valid_len - dplen(path_str) + 1

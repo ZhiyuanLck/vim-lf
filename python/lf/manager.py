@@ -16,9 +16,7 @@ def update_cursor(fun):
 def update_info_path(fun):
     def wrapper(*args, **kwargs):
         fun(*args, **kwargs)
-        self = args[0]
-        middle = self.middle_panel
-        self.info_panel.info_path(middle.index, middle.text)
+        args[0].info_panel.info_path()
     return wrapper
 
 
@@ -46,18 +44,18 @@ class Manager(object):
     @update_info_path
     def _create(self):
         self.border_panel = BorderPanel()
-        self.info_panel = InfoPanel()
         self._init_middle()
         self._init_left()
         self._set_curpath()
         self._change_right(True)
+        self.info_panel = InfoPanel(self)
 
     def _init_left(self):
-        self.left_panel = DirPanel(self.cwd, 0, self.info_panel)
+        self.left_panel = DirPanel(self.cwd, 0)
         self.left_panel.backward()
 
     def _init_middle(self):
-        self.middle_panel = DirPanel(self.cwd, 1, self.info_panel)
+        self.middle_panel = DirPanel(self.cwd, 1)
         self.middle_panel.refresh()
         if self.is_cfile:
             self.middle_panel._index(self.cfile)
@@ -76,7 +74,7 @@ class Manager(object):
     def backward(self):
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
-            self.right_panel = DirPanel(self.curpath, 2, self.info_panel)
+            self.right_panel = DirPanel(self.curpath, 2)
         self._copy_panel(self.middle_panel, self.right_panel)
         self._copy_panel(self.left_panel, self.middle_panel)
         self.left_panel.backward()
@@ -93,33 +91,33 @@ class Manager(object):
             self._set_curpath()
             self._change_right()
 
-    @update_cursor
     @update_info_path
+    @update_cursor
     def down(self):
         self.middle_panel.move(down=True)
 
-    @update_cursor
     @update_info_path
+    @update_cursor
     def up(self):
         self.middle_panel.move(down=False)
 
-    @update_cursor
     @update_info_path
+    @update_cursor
     def top(self):
         self.middle_panel.jump(top=True)
 
-    @update_cursor
     @update_info_path
+    @update_cursor
     def bottom(self):
         self.middle_panel.jump(top=False)
 
-    @update_cursor
     @update_info_path
+    @update_cursor
     def scrollup(self):
         self.middle_panel.scroll(down=False)
 
-    @update_cursor
     @update_info_path
+    @update_cursor
     def scrolldown(self):
         self.middle_panel.scroll(down=True)
 
@@ -192,7 +190,7 @@ class Manager(object):
         if not init:
             self.right_panel.close()
         if self._show_dir():
-            self.right_panel = DirPanel(self.curpath, 2, self.info_panel)
+            self.right_panel = DirPanel(self.curpath, 2)
             if self.curpath is not None:
                 self.right_panel.refresh()
         else:

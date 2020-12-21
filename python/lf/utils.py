@@ -37,7 +37,7 @@ def resetg(opt):
 
 
 def winexec(winid, cmd):
-    vimcmd("call win_execute({}, '{}')".format(winid, cmd))
+    vimcmd('call win_execute({}, "{}")'.format(winid, cmd))
 
 
 def dplen(text):
