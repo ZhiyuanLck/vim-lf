@@ -49,7 +49,8 @@ call s:init_action("open_bottom", "J")
 call s:init_action("open_left", "H")
 call s:init_action("open_right", "L")
 call s:init_action("open_tab", "n")
-call s:init_action("touch", "t")
+call s:init_action("touch", "T")
+call s:init_action("touch_edit", "t")
 call s:init_action("quit", "q")
 
 let g:vlf_mapping_cli = {}

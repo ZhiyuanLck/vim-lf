@@ -41,6 +41,8 @@ action          | key
 `forward`       | `"l"`
 `toggle_hidden` | `"s"`
 `edit`          | `["e", "\<cr>"]`
+`touch_edit`    | `"t"`
+`touch`         | `"T"`
 `open_top`      | `"K"`
 `open_bottom`   | `"J"`
 `open_left`     | `"H"`

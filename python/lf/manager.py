@@ -138,6 +138,14 @@ class Manager(object):
         self.cli.input()
         self.middle_panel.touch(self.cli.cmd)
 
+    def touch_edit(self):
+        self.cli = CliPanel("FileName: ")
+        self.cli.input()
+        path = self.middle_panel.cwd.resolve() / self.cli.cmd
+        self._close()
+        self.is_edit = True
+        vimcmd("edit {}".format(path))
+
     def _open(self, cmd):
         if not self.curpath.is_file():
             return
