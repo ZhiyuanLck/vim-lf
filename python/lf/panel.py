@@ -200,6 +200,10 @@ class InfoPanel(Panel):
         self.left = self.manager.left_panel
         self.middle = self.manager.middle_panel
         self.right = self.manager.right_panel
+        self.index = self.middle.index
+        self.text_list = self.middle.text
+        self.path = self.text_list[self.index].path.resolve()
+        self.total = len(self.text_list)
 
     def _settext(self, text):
         vimcmd("call popup_settext({}, {})".format(self.winid, [text]))
@@ -209,16 +213,19 @@ class InfoPanel(Panel):
 
     def info_path(self):
         self._set_panel()
-        index = self.middle.index
-        text_list = self.middle.text
-        path = text_list[index].path.resolve()
-        if text_list == []:
+        if self.text_list == []:
             self.clear()
             return
-        # file size
-        sz = ''
-        if path.is_file():
-            sz = path.stat().st_size
+        self._set_st()
+        self._set_nr()
+        self._set_path()
+        info = self.path_str + self.sz + self.nr
+        self._settext(info)
+
+    def _set_st(self):
+        self.sz = ''
+        if self.path.is_file():
+            sz = self.path.stat().st_size
             if sz < 2 ** 10:
                 unit = 'B'
             elif sz < 2 ** 20:
@@ -230,20 +237,22 @@ class InfoPanel(Panel):
             else:
                 unit = 'GB'
                 sz >>= 30
-            sz = " {} {} ".format(sz, unit)
-        # lines of a file or directory
+            self.sz = " {} {} ".format(sz, unit)
+
+    def _set_nr(self):
         if isinstance(self.right, DirPanel):
             lines = len(self.right.text)
         elif isinstance(self.right, FilePanel):
             lines = self.right.lines
-        nr_str = " {}/{}:{} ".format(index + 1, len(text_list), lines)
-        valid_len = self.winwidth - len(nr_str) - len(sz) - 1
-        path_str = " {} ".format(str(path))
+        self.nr = " {}/{}:{} ".format(self.index + 1, self.total, lines)
+
+    def _set_path(self):
+        valid_len = self.winwidth - len(self.nr) - len(self.sz)
+        path_str = " {} ".format(str(self.path))
         if dplen(path_str) > valid_len:
-            path_str = path_str[:valid_len - 3] + '...'
-        blank = valid_len - dplen(path_str) + 1
-        info = path_str + blank * ' ' + sz + nr_str
-        self._settext(info)
+            path_str = path_str[:valid_len - 4] + '... '
+        blank = valid_len - dplen(path_str)
+        self.path_str = path_str + blank * ' '
 
 
 class BorderPanel(Panel):
