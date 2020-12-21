@@ -48,7 +48,7 @@ call s:init_action("open_top", "K")
 call s:init_action("open_bottom", "J")
 call s:init_action("open_left", "H")
 call s:init_action("open_right", "L")
-call s:init_action("open_tab", "t")
+call s:init_action("open_tab", "n")
 call s:init_action("quit", "q")
 
 command! -bar -nargs=1 Lf call lf#start(<q-args>)
