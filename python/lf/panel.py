@@ -87,10 +87,16 @@ class DirPanel(Panel):
     def curpath(self):
         return None if self._empty() else self.text[self.index].path
 
-    def refresh(self):
-        self._glob()
-        self._correct_index()
-        self._cursorline()
+    def refresh(self, keep_pos=True):
+        if keep_pos:
+            item = self.curpath()
+            self._glob()
+            self._index(item)
+            self._cursorline()
+        else:
+            self._glob()
+            self._correct_index()
+            self._cursorline()
 
     def backward(self):
         if self.cwd == self.cwd.parent:
@@ -135,15 +141,12 @@ class DirPanel(Panel):
 
     def toggle_hidden(self):
         self.show_hidden = not self.show_hidden
-        # get current path before path list changed
-        item = self.curpath()
-        self._glob()
-        self._index(item)
-        self._cursorline()
+        self.refresh()
 
     def touch(self, name: str):
         file = self.cwd / name
         file.touch()
+        self.refresh()
 
 
 class FilePanel(Panel):
