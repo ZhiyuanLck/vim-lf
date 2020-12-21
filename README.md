@@ -17,9 +17,9 @@ Project is in **preview**, which means:
 
 ![vim-lf][1]
 
-## Actions
+## Main action
 
-You can set the shortcut of action by
+You can set the shortcut of main action by
 ```vim
 let g:vlf_action_<action> = "<key>"
 ```
@@ -40,7 +40,7 @@ action          | key
 `backward`      | `"h"`
 `forward`       | `"l"`
 `toggle_hidden` | `"s"`
-`edit`          | `"e"`
+`edit`          | `["e", "\<cr>"]`
 `open_top`      | `"K"`
 `open_bottom`   | `"J"`
 `open_left`     | `"H"`
@@ -48,7 +48,24 @@ action          | key
 `open_tab`      | `"n"`
 `quit`          | `"q"`
 
-## Actions to be supported
+## Cli action
+
+You can set the shortcut of main action by
+```vim
+let g:vlf_cli_<action> = "<key>"
+```
+
+action     | key
+------     | ---
+`done`     | `"\<cr>"`
+`delete`   | `"\<bs>"`
+`left`     | `"["\<left>", "\<c-h>"]"`
+`right`    | `"["\<right>", "\<c-l>"]"`
+`clear`    | `"\<c-u>"`
+`go_start` | `"\<c-a>"`
+`go_end`   | `"\<c-e>"`
+
+## Features to be supported
 - file operation
   - copy, move, paste, rename
   - undo
