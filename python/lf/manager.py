@@ -136,11 +136,14 @@ class Manager(object):
     def touch(self):
         self.cli = CliPanel("FileName: ")
         self.cli.input()
-        self.middle_panel.touch(self.cli.cmd)
+        if self.cli.do:
+            self.middle_panel.touch(self.cli.cmd)
 
     def touch_edit(self):
         self.cli = CliPanel("FileName: ")
         self.cli.input()
+        if not self.cli.do:
+            return
         path = self.middle_panel.cwd.resolve() / self.cli.cmd
         self._close()
         self.is_edit = True

@@ -66,6 +66,7 @@ action     | key
 `clear`    | `"\<c-u>"`
 `go_start` | `"\<c-a>"`
 `go_end`   | `"\<c-e>"`
+`quit`     | `"\<quit>"`
 
 ## Features to be supported
 - file operation

@@ -77,5 +77,6 @@ call s:init_cli("right", ["\<right>", "\<c-l>"])
 call s:init_cli("clear", "\<c-u>")
 call s:init_cli("go_start", "\<c-a>")
 call s:init_cli("go_end", "\<c-e>")
+call s:init_cli("quit", "\<esc>")
 
 command! -bar -nargs=1 Lf call lf#start(<q-args>)

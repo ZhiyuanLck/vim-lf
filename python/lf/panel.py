@@ -329,7 +329,7 @@ class CliPanel(BottomPanel):
     def input(self):
         while 1:
             action = vimeval("lf#cli()")
-            if action == 'done':
+            if action in ['done', 'quit']:
                 break
 
     def _empty(self):
@@ -391,6 +391,11 @@ class CliPanel(BottomPanel):
 
     def done(self):
         self.close()
+        self.do = True
+
+    def quit(self):
+        self.close()
+        self.do = False
 
 
 class BorderPanel(Panel):
