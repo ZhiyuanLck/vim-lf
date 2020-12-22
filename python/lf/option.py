@@ -94,9 +94,10 @@ class Option(object):
         self.min_dir_width = 20
         self.min_file_width = 40
         self.zindex = {"border": 1,
-                "main:": 10,
-                "info": 20,
-                "input": 30,
+                "main:": 100,
+                "info": 200,
+                "cli": 300,
+                "msg": 400,
                 }
         self._border_opt()
         self._left_opt()
@@ -159,21 +160,22 @@ class Option(object):
                 padding = self.inner_padding
                 )
 
-    def _info_opt(self):
-        self.popup_info = Popup(width = self.popup_border.inner_width,
+    def _bottom_opt(self, name):
+        return Popup(width = self.popup_border.inner_width,
                 height = 1,
                 col = self.popup_border.col + 1,
                 line = self.popup_left.line + self.popup_left.win_height,
-                padding = [0, 0, 0, 0], zindex = self.zindex["info"],
+                padding = [0, 0, 0, 0], zindex = self.zindex[name],
                 )
 
+    def _info_opt(self):
+        self.popup_info = self._bottom_opt("info")
+
+    def _warning_opt(self):
+        pass
+
     def _cli_opt(self):
-        self.popup_cli = Popup(width = self.popup_border.inner_width,
-                height = 1,
-                col = self.popup_border.col + 1,
-                line = self.popup_left.line + self.popup_left.win_height,
-                padding = [0, 0, 0, 0], zindex = self.zindex["input"],
-                )
+        self.popup_cli = self._bottom_opt("cli")
 
     def _sep_opt(self):
         self.popup_sep_a = Popup(width=1, height=self.inner_height,
