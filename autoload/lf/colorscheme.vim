@@ -1,23 +1,23 @@
 let s:cterm_fg = synIDattr(hlID("Normal"), "fg", "cterm") ? "fg" : 251
 let s:cterm_bg = synIDattr(hlID("Normal"), "bg", "cterm") ? "bg" : 235
 let s:default_highlights = {
-      \ "vlf_hl_dir": #{
+      \ "vlf_hl_path_dir": #{
       \   ctermfg : "32",
       \   guifg : "#6699cc",
       \   cterm : "bold",
       \   gui : "bold",
       \   },
-      \ "vlf_hl_file": #{
+      \ "vlf_hl_path_file": #{
       \   ctermfg : "228",
       \   guifg : s:cterm_fg,
       \   },
-      \ "vlf_hl_hidden_dir": #{
+      \ "vlf_hl_path_hidden_dir": #{
       \   ctermfg : "248",
       \   guifg : "#657371",
       \   cterm : "bold",
       \   gui : "bold",
       \   },
-      \ "vlf_hl_hidden_file": #{
+      \ "vlf_hl_path_hidden_file": #{
       \   ctermfg : "248",
       \   guifg : "#657371",
       \   },
@@ -58,7 +58,11 @@ let s:default_highlights = {
       \   ctermfg : "0",
       \   },
       \ }
-let s:base_prop = ["dir", "hidden_dir", "file", "hidden_file"]
+let s:prop_type = #{
+      \ path: ["dir", "hidden_dir", "file", "hidden_file"],
+      \ info: ["size", "nr", "path"],
+      \ cli: ["prompt", "cursor"],
+      \ }
 let s:extra_prop_patterns = #{}
 
 function! lf#colorscheme#highlight() abort
@@ -73,24 +77,28 @@ function! lf#colorscheme#highlight() abort
   endfor
 endfunction
 
-function! lf#colorscheme#path_prop(bufnr) abort
-  for prop in s:base_prop
-    let hl = "vlf_hl_".prop
+function! s:add_proptype(prop_type, bufnr) abort
+  for prop in s:prop_type[a:prop_type]
+    let hl = "vlf_hl_".a:prop_type."_".prop
     call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
   endfor
-  call prop_type_add("cursorline", #{bufnr: a:bufnr, highlight: hl})
+endfunction
+
+function! lf#colorscheme#path_prop(bufnr) abort
+  call s:add_proptype("path", a:bufnr)
 endfunction
 
 function! lf#colorscheme#info_prop(bufnr) abort
-  for prop in ["size", "nr", "path"]
-    let hl = "vlf_hl_info_".prop
-    call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
-  endfor
+  call s:add_proptype("info", a:bufnr)
 endfunction
 
 function! lf#colorscheme#cli_prop(bufnr) abort
-  for prop in ["prompt", "cursor"]
-    let hl = "vlf_hl_cli_".prop
-    call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
-  endfor
+  call s:add_proptype("cli", a:bufnr)
 endfunction
+
+" function! lf#colorscheme#msg_prop(bufnr) abort
+  " for prop in ["warning", "default"]
+    " let hl = "vlf_hl_msg_".prop
+    " call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
+  " endfor
+" endfunction
