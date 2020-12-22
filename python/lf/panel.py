@@ -196,7 +196,7 @@ class FilePanel(Panel):
             vimcmd("bwipeout {}".format(self.bufnr))
 
 
-class _InfoPanel(Panel):
+class BottomPanel(Panel):
     def __init__(self, name, has_prop=True):
         self.winid = vimeval("popup_create([], {})".format(lfopt.popup(name)))
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
@@ -212,7 +212,7 @@ class _InfoPanel(Panel):
         self._settext('')
 
 
-class InfoPanel(_InfoPanel):
+class InfoPanel(BottomPanel):
     def __init__(self, manager):
         super().__init__("info")
         self.manager = manager
@@ -300,7 +300,7 @@ def update(fun):
     return wrapper
 
 
-class CliPanel(_InfoPanel):
+class CliPanel(BottomPanel):
     def __init__(self, prompt):
         super().__init__("cli")
         self.prompt = prompt
