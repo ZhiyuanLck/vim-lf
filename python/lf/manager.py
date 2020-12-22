@@ -146,6 +146,10 @@ class Manager(object):
         self.is_edit = True
         vimcmd("edit {}".format(path))
 
+    @update_all
+    def remove(self):
+        pass
+
     def _open(self, cmd):
         if not self.curpath.is_file():
             return

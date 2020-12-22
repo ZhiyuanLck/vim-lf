@@ -171,8 +171,8 @@ class Option(object):
     def _info_opt(self):
         self.popup_info = self._bottom_opt("info")
 
-    def _warning_opt(self):
-        pass
+    def _msg_opt(self):
+        self.popup_msg = self._border_opt("msg")
 
     def _cli_opt(self):
         self.popup_cli = self._bottom_opt("cli")
