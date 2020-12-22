@@ -42,7 +42,7 @@ class Manager(object):
         vimcmd("call lf#colorscheme#highlight()")
 
     def start(self, cwd):
-        self.is_edit = False
+        self.is_quit = False
         self.is_cfile = False
         self._resolve(cwd)
         vimcmd("set laststatus=0")
@@ -82,7 +82,7 @@ class Manager(object):
         break_list = ['edit', 'quit']
         while 1:
             action = vimeval("lf#action()")
-            if self.is_edit:
+            if self.is_quit:
                 break
             if action in break_list:
                 break
@@ -146,7 +146,7 @@ class Manager(object):
             return
         path = self.middle_panel.cwd.resolve() / self.cli.cmd
         self._close()
-        self.is_edit = True
+        self.is_quit = True
         vimcmd("edit {}".format(path))
 
     @update_all
@@ -158,7 +158,7 @@ class Manager(object):
             return
         self._close()
         vimcmd("{} {}".format(cmd, self._cur_path()))
-        self.is_edit = True
+        self.is_quit = True
         #  resetg("wrap")
         #  resetg("buflisted")
         #  resetg("buftype")
