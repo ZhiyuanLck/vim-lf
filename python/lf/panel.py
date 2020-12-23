@@ -40,7 +40,7 @@ class DirPanel(Panel):
         self._set_wincolor()
 
     def _glob(self):
-        self.path_list = sorted(self.cwd.glob('*'))
+        self.path_list = self.cwd.glob('*')
         self._set_text()
 
     def _set_text(self):
@@ -396,6 +396,11 @@ class CliPanel(BottomPanel):
     def quit(self):
         self.close()
         self.do = False
+
+
+class MsgPanel(BottomPanel):
+    def __init__(self, msg_type, msg):
+        super().__init__("msg")
 
 
 class BorderPanel(Panel):
