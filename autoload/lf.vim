@@ -20,20 +20,25 @@ function! lf#start(cwd) abort
   exec g:vlf_py printf("vlf_manager.start('%s')", cwd)
 endfunction
 
-function! lf#action() abort
+function! s:input(runner, default_action) abort
   redraw
   let nr = getchar()
   let ch = type(nr) ? nr : nr2char(nr)
-  let action = get(g:vlf_mapping_main, ch, 'skip')
-  exec g:vlf_py printf("vlf_manager.%s()", action)
+  let name = a:runner == '' ? 'main' : a:runner
+  exec printf("let action = get(g:vlf_mapping_%s, ch, '%s')", name, a:default_action)
+  let member = a:runner == '' ? '' : a:runner.'.'
+  exec g:vlf_py printf("vlf_manager.%s%s()", member, action)
   return action
 endfunction
 
-function! lf#cli() abort
-  redraw
-  let nr = getchar()
-  let ch = type(nr) ? nr : nr2char(nr)
-  let action = get(g:vlf_mapping_cli, ch, 'add')
-  exec g:vlf_py printf("vlf_manager.cli.%s()", action)
-  return action
+function! lf#action() abort
+  call s:input('', 'skip')
 endfunction
+
+function! lf#cli() abort
+  call s:input('cli', 'add')
+endfunction
+
+" function! lf#msg() abort
+  
+" endfunction
