@@ -21,6 +21,7 @@ call s:init_var("sort_ignorecase", 1)
 
 let g:vlf_mapping_main = {}
 let g:vlf_mapping_cli = {}
+let g:vlf_mapping_msg = {}
 
 function! s:init_single_action(type, action, key)
   call s:init_var("action_".a:type.'_'.a:action, a:key)
@@ -45,6 +46,10 @@ function! s:init_action_cli(action, key) abort
   call s:init_action("cli", a:action, a:key)
 endfunction
 
+function! s:init_action_msg(action, key) abort
+  call s:init_action("msg", a:action, a:key)
+endfunction
+
 call s:init_action_main("up", "k")
 call s:init_action_main("down", "j")
 call s:init_action_main("top", "g")
@@ -62,6 +67,7 @@ call s:init_action_main("open_right", "L")
 call s:init_action_main("open_tab", "n")
 call s:init_action_main("touch", "T")
 call s:init_action_main("touch_edit", "t")
+call s:init_action_main("delete", "d")
 call s:init_action_main("quit", "q")
 
 call s:init_action_cli("done", "\<cr>")
@@ -72,5 +78,8 @@ call s:init_action_cli("clear", "\<c-u>")
 call s:init_action_cli("go_start", "\<c-a>")
 call s:init_action_cli("go_end", "\<c-e>")
 call s:init_action_cli("quit", "\<esc>")
+
+call s:init_action_msg("agree", ["y", "\<cr>"])
+call s:init_action_msg("cancel", ["n", "\<esc>"])
 
 command! -bar -nargs=1 Lf call lf#start(<q-args>)

@@ -57,11 +57,23 @@ let s:default_highlights = {
       \   ctermbg : "249",
       \   ctermfg : "0",
       \   },
+      \ "vlf_hl_msg_warning": #{
+      \   ctermfg : "9",
+      \   cterm: "bold",
+      \   },
+      \ "vlf_hl_msg_default": #{
+      \   ctermfg : "48",
+      \   cterm: "bold",
+      \   },
+      \ "vlf_hl_msg_content": #{
+      \   ctermfg : "215",
+      \   },
       \ }
 let s:prop_type = #{
       \ path: ["dir", "hidden_dir", "file", "hidden_file"],
       \ info: ["size", "nr", "path"],
       \ cli: ["prompt", "cursor"],
+      \ msg: ["warning", "default", "content"],
       \ }
 let s:extra_prop_patterns = #{}
 
@@ -96,9 +108,6 @@ function! lf#colorscheme#cli_prop(bufnr) abort
   call s:add_proptype("cli", a:bufnr)
 endfunction
 
-" function! lf#colorscheme#msg_prop(bufnr) abort
-  " for prop in ["warning", "default"]
-    " let hl = "vlf_hl_msg_".prop
-    " call prop_type_add(prop, #{bufnr: a:bufnr, highlight: hl})
-  " endfor
-" endfunction
+function! lf#colorscheme#msg_prop(bufnr) abort
+  call s:add_proptype("msg", a:bufnr)
+endfunction

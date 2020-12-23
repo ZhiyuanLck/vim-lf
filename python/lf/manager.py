@@ -2,6 +2,7 @@ from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
+from .panel import MsgRemovePanel
 from .option import lfopt
 
 
@@ -150,8 +151,18 @@ class Manager(object):
         vimcmd("edit {}".format(path))
 
     @update_all
-    def remove(self):
-        pass
+    def delete(self):
+        self.msg = MsgRemovePanel([self.curpath])
+        self.msg.action()
+        if not self.msg.do:
+            return
+        for path in [self.curpath]:
+            print(path.exists())
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                print("File not find")
+        self.middle_panel.refresh(keep_pos=False)
 
     def _open(self, cmd):
         if not self.curpath.is_file():
@@ -193,6 +204,7 @@ class Manager(object):
 
     def quit(self):
         self._close()
+        self.is_quit = True
 
     @update_info_path
     def toggle_hidden(self):

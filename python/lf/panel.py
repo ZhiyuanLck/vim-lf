@@ -1,11 +1,23 @@
 from copy import copy
+from operator import attrgetter
 from .utils import vimeval, vimcmd
 from .utils import setlocal, winexec, dplen, bytelen
-from .text import Text
+from .text import Text, SimpleLine
 from .option import lfopt
 
 
 class Panel(object):
+    def __init__(self, name, has_prop=True):
+        self.winid = vimeval("popup_create([], {})".format(lfopt.popup(name)))
+        self.bufnr = vimeval("winbufnr({})".format(self.winid))
+        self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
+        self._set_wincolor()
+        if has_prop:
+            self._set_textprop(name)
+
+    def _set_textprop(self, name):
+        vimcmd("call lf#colorscheme#{}_prop({})".format(name, self.bufnr))
+
     def close(self):
         vimcmd("call popup_close({})".format(self.winid))
 
@@ -196,14 +208,9 @@ class FilePanel(Panel):
             vimcmd("bwipeout {}".format(self.bufnr))
 
 
-class BottomPanel(Panel):
+class BaseShowPanel(Panel):
     def __init__(self, name, has_prop=True):
-        self.winid = vimeval("popup_create([], {})".format(lfopt.popup(name)))
-        self.bufnr = vimeval("winbufnr({})".format(self.winid))
-        self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
-        self._set_wincolor()
-        if has_prop:
-            vimcmd("call lf#colorscheme#{}_prop({})".format(name, self.bufnr))
+        super().__init__(name, has_prop)
 
     def _settext(self, text):
         vimcmd("call popup_settext({}, {})".format(self.winid, text))
@@ -212,7 +219,7 @@ class BottomPanel(Panel):
         self._settext('')
 
 
-class InfoPanel(BottomPanel):
+class InfoPanel(BaseShowPanel):
     def __init__(self, manager):
         super().__init__("info")
         self.manager = manager
@@ -300,7 +307,7 @@ def update(fun):
     return wrapper
 
 
-class CliPanel(BottomPanel):
+class CliPanel(BaseShowPanel):
     def __init__(self, prompt):
         super().__init__("cli")
         self.prompt = prompt
@@ -398,9 +405,49 @@ class CliPanel(BottomPanel):
         self.do = False
 
 
-class MsgPanel(BottomPanel):
-    def __init__(self, msg_type, msg):
+class MsgRemovePanel(BaseShowPanel):
+    def __init__(self, path_list):
         super().__init__("msg")
+        self.do = False
+        self._set_textprop("path")
+        self.path_list = path_list
+        self._settext_firstline()
+        self._settext_file()
+        self._settext(self.dic_list)
+
+    def action(self):
+        while 1:
+            action = vimeval("lf#msg()")
+            if action in ["cancel", "agree"]:
+                break
+
+    def _settext_firstline(self):
+        firstline = "Are you sure to delete following files?"
+        warning_len = bytelen(firstline)
+        firstline += " (y"
+        default_opt_pos = bytelen(firstline)
+        firstline += "/n)"
+        self.dic_list = [{"text": firstline,
+            "props": [
+                {"col": 1, "length": warning_len, "type": "warning"},
+                {"col": default_opt_pos ,
+                    "length": 1,
+                    "type": "default"}]
+            }]
+
+    def _settext_file(self):
+        lines = sorted([SimpleLine(p) for p in self.path_list], key=attrgetter("sort_dir_first", "lower_text"))
+        self.dic_list.extend([line.opt for line in lines])
+
+    def agree(self):
+        self.do = True
+        self.close()
+
+    def cancel(self):
+        self.close()
+
+    def skip(self):
+        pass
 
 
 class BorderPanel(Panel):

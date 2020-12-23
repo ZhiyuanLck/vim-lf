@@ -108,6 +108,7 @@ class Option(object):
         self._info_opt()
         self._cli_opt()
         self._sep_opt()
+        self._msg_opt()
 
     def popup(self, name):
         return getattr(self, "popup_{}".format(name)).opt
@@ -162,6 +163,13 @@ class Option(object):
                 padding = self.inner_padding
                 )
 
+    def _msg_opt(self):
+        self.popup_msg = Popup(self.inner_width, self.inner_height,
+                *self.popup_border.shifted_anchor(),
+                padding = self.inner_padding,
+                zindex = self.zindex["msg"]
+                )
+
     def _bottom_opt(self, name):
         return Popup(width = self.popup_border.inner_width,
                 height = 1,
@@ -172,9 +180,6 @@ class Option(object):
 
     def _info_opt(self):
         self.popup_info = self._bottom_opt("info")
-
-    def _msg_opt(self):
-        self.popup_msg = self._border_opt("msg")
 
     def _cli_opt(self):
         self.popup_cli = self._bottom_opt("cli")

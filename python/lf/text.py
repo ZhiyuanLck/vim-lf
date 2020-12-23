@@ -3,7 +3,47 @@ from .utils import vimeval, dplen, bytelen
 from .option import lfopt
 
 
-class Line(object):
+class BaseLine(object):
+    def __init__(self, path):
+        self.path = path
+        self.text = ''
+        self._parse_type()
+
+    def _parse_type(self):
+        self.is_hidden = self.path.name.startswith('.')
+        self.is_dir = self.path.is_dir()
+
+    def _get_proptype(self):
+        if self.is_dir:
+            prop_type = "hidden_dir" if self.is_hidden else "dir"
+        else:
+            prop_type = "hidden_file" if self.is_hidden else "file"
+        return prop_type
+
+
+class SimpleLine(BaseLine):
+    def __init__(self, path):
+        super().__init__(path)
+        self._set_text()
+        self._set_sort()
+        self._set_textline()
+
+    def _set_text(self):
+        self.text = str(self.path.resolve())
+
+    def _set_sort(self):
+        self.sort_dir_first = 0 if self.is_dir else 1
+        self.lower_text = self.text.lower()
+
+    def _set_textline(self):
+        opt = {"text": self.text}
+        prop = {"col": 1, "length": bytelen(self.text)}
+        prop["type"] = self._get_proptype()
+        opt["props"] = [prop]
+        self.opt = opt
+
+
+class Line(BaseLine):
     def __init__(self, cwd, path, winwidth, show_hidden):
         self._cwd = cwd
         self.path = path
@@ -13,10 +53,6 @@ class Line(object):
         self._set_text()
         self._set_textline()
         self._set_sort()
-
-    def _parse_type(self):
-        self.is_hidden = self.path.name.startswith('.')
-        self.is_dir = self.path.is_dir()
 
     def _set_sort(self):
         self.sort_dir_first = 0 if self.is_dir else 1
@@ -37,16 +73,7 @@ class Line(object):
     def _set_textline(self):
         opt = {"text": self.text}
         prop = {"col": 1, "length": self.bytelen}
-        if self._show_hidden:
-            if self.path.is_dir():
-                prop_type = "hidden_dir" if self.is_hidden else "dir"
-            elif self.path.is_file():
-                prop_type = "hidden_file" if self.is_hidden else "file"
-            else:
-                prop_type = "file"
-        else:
-            prop_type = "dir" if self.path.is_dir() else "file"
-        prop["type"] = prop_type
+        prop["type"] = self._get_proptype()
         opt["props"] = [prop]
         self.opt = opt
 

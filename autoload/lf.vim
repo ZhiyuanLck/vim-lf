@@ -20,7 +20,7 @@ function! lf#start(cwd) abort
   exec g:vlf_py printf("vlf_manager.start('%s')", cwd)
 endfunction
 
-function! s:input(runner, default_action) abort
+function! s:action(runner, default_action) abort
   redraw
   let nr = getchar()
   let ch = type(nr) ? nr : nr2char(nr)
@@ -32,13 +32,13 @@ function! s:input(runner, default_action) abort
 endfunction
 
 function! lf#action() abort
-  call s:input('', 'skip')
+  return s:action('', 'skip')
 endfunction
 
 function! lf#cli() abort
-  call s:input('cli', 'add')
+  return s:action('cli', 'add')
 endfunction
 
-" function! lf#msg() abort
-  
-" endfunction
+function! lf#msg() abort
+  return s:action('msg', 'skip')
+endfunction
