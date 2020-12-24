@@ -1,5 +1,6 @@
-from .utils import vimget, vimeval
 from copy import copy
+from pathlib import Path
+from .utils import vimget, vimeval
 
 
 class Popup(object):
@@ -15,8 +16,6 @@ class Popup(object):
         if border:
             self.set_border()
         self._parse_size(width, height)
-        #  self.set_width(width)
-        #  self.set_height(height)
         self.set_zindex(zindex)
         self.set_anchor(col, line)
 
@@ -78,6 +77,20 @@ class Option(object):
         self.sort_dir_first = vimget('sort_dir_first', 1) == '1'
         self.sort_ignorecase = vimget('sort_ignorecase', 1) == '1'
         self.file_numbered = vimget('file_numbered', 0) == '1'
+        self._set_path()
+
+    def _set_path(self):
+        cache_path = vimget("cache_path", "'~/.vim/cache/vim-lf'")
+        self.cache_path = self._get_path(cache_path)
+        self._mkdir(self.cache_path)
+        self.log_path = self.cache_path / 'vim-lf.log'
+
+    def _get_path(self, path):
+        return Path(path).expanduser().resolve()
+
+    def _mkdir(self, path):
+        if not path.exists():
+            path.mkdir(parents=True)
 
     def _popup(self):
         self.width = vimget('width', 0.8, 2)

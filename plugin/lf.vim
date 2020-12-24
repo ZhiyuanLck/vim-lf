@@ -19,6 +19,7 @@ call s:init_var("border", [1, 1, 1, 1])
 call s:init_var("sort_dir_first", 1)
 call s:init_var("sort_ignorecase", 1)
 call s:init_var("file_numbered", 0)
+call s:init_var("cache_path", "~/.vim/cache/vim-lf")
 
 let g:vlf_mapping_main = {}
 let g:vlf_mapping_cli = {}
@@ -88,3 +89,9 @@ call s:init_action_msg("agree", ["y", "\<cr>"])
 call s:init_action_msg("cancel", ["n", "\<esc>"])
 
 command! -bar -nargs=1 Lf call lf#start(<q-args>)
+command! -bar -nargs=0 LfLog call lf#check_log()
+
+augroup Vimlf
+  autocmd!
+  autocmd VimLeave * call lf#reset_log()
+augroup END

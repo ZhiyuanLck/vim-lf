@@ -42,3 +42,11 @@ endfunction
 function! lf#msg() abort
   return s:action('msg', 'skip')
 endfunction
+
+function! lf#check_log() abort
+  exec g:vlf_py "vlf_manager.check_log()"
+endfunction
+
+function! lf#reset_log() abort
+  exec g:vlf_py "vlf_manager.reset_log()"
+endfunction

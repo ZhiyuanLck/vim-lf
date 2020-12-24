@@ -4,7 +4,7 @@ from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .panel import MsgRemovePanel
 from .option import lfopt
-from .logger import *
+from .logger import logger
 
 
 def _update(fun, ignore):
@@ -44,11 +44,14 @@ class Manager(object):
         vimcmd("call lf#colorscheme#highlight()")
 
     def check_log(self):
-        vimcmd("vert botright split {}".format(lfopt.log_path))
-        pass
+        vimcmd("vert botright split {}".format(self._escape_path(lfopt.log_path)))
+
+    def reset_log(self):
+        if lfopt.log_path.exists():
+            lfopt.log_path.unlink()
 
     def start(self, cwd):
-        logger_normal.info("start manager")
+        logger.normal.info("start manager")
         self.is_quit = False
         self.is_cfile = False
         self.is_keep_open = False
