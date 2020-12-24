@@ -77,6 +77,7 @@ class Option(object):
         self.auto_edit_cmd = vimget('auto_edit_cmd', "'edit'")
         self.sort_dir_first = vimget('sort_dir_first', 1) == '1'
         self.sort_ignorecase = vimget('sort_ignorecase', 1) == '1'
+        self.file_numbered = vimget('file_numbered', 0) == '1'
 
     def _popup(self):
         self.width = vimget('width', 0.8, 2)

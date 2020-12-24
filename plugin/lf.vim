@@ -18,6 +18,7 @@ call s:init_var("outer_padding", [0, 1, 0, 1])
 call s:init_var("border", [1, 1, 1, 1])
 call s:init_var("sort_dir_first", 1)
 call s:init_var("sort_ignorecase", 1)
+call s:init_var("file_numbered", 0)
 
 let g:vlf_mapping_main = {}
 let g:vlf_mapping_cli = {}

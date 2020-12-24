@@ -187,11 +187,12 @@ class FilePanel(Panel):
 
     def _set_option(self):
         winid = self.winid
+        if lfopt.file_numbered:
+            setlocal(winid, "number")
         #  setlocal(winid, "wrap")
         #  setlocal(winid, "nobuflisted")
         #  setlocal(winid, "buftype=nowrite")
         #  setlocal(winid, "bufhidden=hide")
-        #  setlocal(winid, "number")
         #  setlocal(winid, "undolevels=-1")
         #  setlocal(winid, "noswapfile")
         #  setlocal(winid, "nolist")
