@@ -247,17 +247,22 @@ class Manager(object):
     def _open(self, cmd):
         if self.is_keep_open:
             self.right_panel.set_exist()
-        else:
-            self.is_quit = True
-        self._close()
+            self._close()
+        is_open = False
         for path in self._get_path_list():
             if not path.is_file():
                 continue
+            is_open = True
             vimcmd("{} {}".format(cmd, self._escape_path(path)))
         if self.is_keep_open:
             self._restore()
             self.is_keep_open = False
-        self.normal()
+            self.normal()
+        elif is_open:
+            self._close()
+            self.is_quit = True
+        else:
+            self.normal()
 
     def edit(self):
         self._open("edit")
