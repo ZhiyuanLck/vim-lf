@@ -28,7 +28,6 @@ class Panel(object):
 class Visual(object):
     def __init__(self, panel):
         self.panel = panel
-        self.winid = self.panel.winid
         self.path_list = panel._get_path_list()
         self.max_len = len(self.path_list)
         self.start = panel.index
@@ -38,8 +37,10 @@ class Visual(object):
         self.is_add = True
         self._update()
 
+    def _winid(self):
+        return self.panel.winid
+
     def _range(self):
-        self.winid = self.panel.winid
         return range(min(self.start, self.end), max(self.start, self.end) + 1)
 
     def selection(self):
@@ -53,17 +54,16 @@ class Visual(object):
         for index in self._range():
             vimcmd(
                 "call matchaddpos('vlf_hl_cursorline_v', [%s], 100, -1, #{window: %s})"
-                % (index + 1, self.winid))
+                % (index + 1, self._winid()))
         vimcmd(
             "call matchaddpos('vlf_hl_cursorline_1', [%s], 200, -1, #{window: %s})"
-            % (self.end + 1, self.winid))
-        vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.end + 1))
+            % (self.end + 1, self._winid()))
+        vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self._winid(), self.end + 1))
 
     def _match_clear(self):
-        vimcmd("call clearmatches({})".format(self.winid))
+        vimcmd("call clearmatches({})".format(self._winid()))
 
     def quit(self, interrupt=False):
-        self.winid = self.panel.winid
         self._match_clear()
         self.panel.mode = "normal"
         #  if not interrupt:

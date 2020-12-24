@@ -4,6 +4,7 @@ from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .panel import MsgRemovePanel
 from .option import lfopt
+from .logger import *
 
 
 def _update(fun, ignore):
@@ -42,7 +43,12 @@ class Manager(object):
     def __init__(self):
         vimcmd("call lf#colorscheme#highlight()")
 
+    def check_log(self):
+        vimcmd("vert botright split {}".format(lfopt.log_path))
+        pass
+
     def start(self, cwd):
+        logger_normal.info("start manager")
         self.is_quit = False
         self.is_cfile = False
         self.is_keep_open = False
@@ -60,6 +66,9 @@ class Manager(object):
             self.cfile = Path(vimeval("expand('%:p')")).resolve()
         else:
             self.cwd = Path(cwd).resolve()
+
+    def _escape_path(self, path):
+        return str(path.resolve()).replace(' ', '\\ ')
 
     def _is_normal(self):
         self._set_mode()
@@ -106,6 +115,8 @@ class Manager(object):
         self.mode = self.middle_panel.mode
 
     def normal(self):
+        if self.is_quit:
+            return
         if self._is_visual():
             self.v_block.quit()
             self._set_mode()
@@ -239,7 +250,7 @@ class Manager(object):
         for path in self._get_path_list():
             if not path.is_file():
                 continue
-            vimcmd("{} {}".format(cmd, str(path.resolve()).replace(' ', '\\ ')))
+            vimcmd("{} {}".format(cmd, self._escape_path(path)))
         if self.is_keep_open:
             self._restore()
             self.is_keep_open = False
