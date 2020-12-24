@@ -45,6 +45,7 @@ class Manager(object):
     def start(self, cwd):
         self.is_quit = False
         self.is_cfile = False
+        self.is_keep_open = False
         self._resolve(cwd)
         vimcmd("set laststatus=0")
         vimcmd("set t_ve=")
@@ -80,12 +81,9 @@ class Manager(object):
             self.middle_panel._cursorline()
 
     def _action(self):
-        break_list = ['edit', 'quit']
         while 1:
             action = vimeval("lf#action()")
             if self.is_quit:
-                break
-            if action in break_list:
                 break
 
     @update_info
@@ -146,9 +144,15 @@ class Manager(object):
         if not self.cli.do:
             return
         path = self.middle_panel.cwd.resolve() / self.cli.cmd
+        if self.is_keep_open:
+            self.right_panel.set_exist()
+        else:
+            self.is_quit = True
         self._close()
-        self.is_quit = True
         vimcmd("edit {}".format(path))
+        if self.is_keep_open:
+            self._restore()
+            self.is_keep_open = False
 
     @update_all
     def delete(self):
@@ -167,9 +171,16 @@ class Manager(object):
     def _open(self, cmd):
         if not self.curpath.is_file():
             return
+        print(self.is_keep_open, self.is_quit)
+        if self.is_keep_open:
+            self.right_panel.set_exist()
+        else:
+            self.is_quit = True
         self._close()
         vimcmd("{} {}".format(cmd, self._cur_path()))
-        self.is_quit = True
+        if self.is_keep_open:
+            self._restore()
+            self.is_keep_open = False
         #  resetg("wrap")
         #  resetg("buflisted")
         #  resetg("buftype")
@@ -206,6 +217,9 @@ class Manager(object):
         self._close()
         self.is_quit = True
 
+    def keep_open(self):
+        self.is_keep_open = True
+
     @update_info_path
     def toggle_hidden(self):
         self.left_panel.toggle_hidden()
@@ -215,6 +229,16 @@ class Manager(object):
 
     def skip(self):
         pass
+
+    @update_info_path
+    def _restore(self):
+        self.border_panel = BorderPanel()
+        self.left_panel._create_popup()
+        self.left_panel.refresh()
+        self.middle_panel._create_popup()
+        self.middle_panel.refresh()
+        self._change_right(True)
+        self.info_panel = InfoPanel(self)
 
     def _right_is_dir(self):
         return isinstance(self.right_panel, DirPanel)

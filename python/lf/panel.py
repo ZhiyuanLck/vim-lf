@@ -182,6 +182,9 @@ class FilePanel(Panel):
         winexec(self.winid, "let _lines = line('$')")
         self.lines = vimeval("_lines", 1)
 
+    def set_exist(self):
+        self.buf_exist = True
+
     def _set_option(self):
         winid = self.winid
         #  setlocal(winid, "wrap")

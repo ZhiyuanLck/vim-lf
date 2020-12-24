@@ -69,6 +69,7 @@ call s:init_action_main("touch", "T")
 call s:init_action_main("touch_edit", "t")
 call s:init_action_main("delete", "d")
 call s:init_action_main("quit", "q")
+call s:init_action_main("keep_open", "g")
 
 call s:init_action_cli("done", "\<cr>")
 call s:init_action_cli("delete", ["\<bs>"])
