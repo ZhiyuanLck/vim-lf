@@ -25,6 +25,82 @@ class Panel(object):
         setlocal(self.winid, "wincolor={}".format(lfopt.wincolor))
 
 
+class Visual(object):
+    def __init__(self, panel):
+        self.panel = panel
+        self.winid = self.panel.winid
+        self.path_list = panel._get_path_list()
+        self.max_len = len(self.path_list)
+        self.start = panel.index
+        self.end = panel.index
+        self.scroll_line = panel.scroll_line
+        self.id_list = []
+        self.is_add = True
+        self._update()
+
+    def _range(self):
+        self.winid = self.panel.winid
+        return range(min(self.start, self.end), max(self.start, self.end) + 1)
+
+    def selection(self):
+        a, b = min(self.start, self.end), max(self.start, self.end) + 1
+        return self.path_list[a:b]
+
+    def _update(self):
+        self.panel.index = self.end
+        self.panel.refresh(keep_pos=False)
+        self._match_clear()
+        for index in self._range():
+            vimcmd(
+                "call matchaddpos('vlf_hl_cursorline_v', [%s], 100, -1, #{window: %s})"
+                % (index + 1, self.winid))
+        vimcmd(
+            "call matchaddpos('vlf_hl_cursorline_1', [%s], 200, -1, #{window: %s})"
+            % (self.end + 1, self.winid))
+        vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.end + 1))
+
+    def _match_clear(self):
+        vimcmd("call clearmatches({})".format(self.winid))
+
+    def quit(self, interrupt=False):
+        self.winid = self.panel.winid
+        self._match_clear()
+        self.panel.mode = "normal"
+        #  if not interrupt:
+            #  self.panel.index = self.start if self.start < self.end else self.end
+            #  self.panel.refresh(keep_pos=False)
+
+    def change_active(self):
+        self.start, self.end = self.end, self.start
+        self._update()
+
+    def _move(self, index):
+        self.end = index
+        if self.end >= self.max_len:
+            self.end = self.max_len - 1
+        elif self.end < 0:
+            self.end = 0
+        self._update()
+
+    def down(self):
+        self._move(self.end + 1)
+
+    def up(self):
+        self._move(self.end - 1)
+
+    def scroll_down(self):
+        self._move(self.end + self.scroll_line)
+
+    def scroll_up(self):
+        self._move(self.end - self.scroll_line)
+
+    def top(self):
+        self._move(0)
+
+    def bottom(self):
+        self._move(self.max_len - 1)
+
+
 class DirPanel(Panel):
     def __init__(self, cwd, number):
         self.cwd = cwd.resolve()
@@ -35,6 +111,7 @@ class DirPanel(Panel):
         self.path_list = None
         self.show_hidden = lfopt.show_hidden
         self._create_popup()
+        self.mode = "normal"
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         winheight = vimeval("winheight({})".format(self.winid), 1)
         self.scroll_line = winheight // 2
@@ -50,6 +127,17 @@ class DirPanel(Panel):
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         vimcmd("call lf#colorscheme#path_prop({})".format(self.bufnr))
         self._set_wincolor()
+
+    def _is_normal(self):
+        return self.mode == "normal"
+
+    def _is_visual(self):
+        return self.mode == "visual"
+
+    def _get_path_list(self):
+        if self.text is None:
+            return None
+        return [line.path for line in self.text]
 
     def _glob(self):
         self.path_list = self.cwd.glob('*')
@@ -73,6 +161,12 @@ class DirPanel(Panel):
                 "matchaddpos('vlf_hl_cursorline_%d', [%s], 100, -1, #{window: %s})"
                 % (self.number, self.index + 1, self.winid))
         vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.index + 1))
+
+    def visual(self):
+        if self._empty():
+            return
+        self.v_block = Visual(self)
+        self.mode = 'visual'
 
     def _correct_index(self):
         """
@@ -189,18 +283,6 @@ class FilePanel(Panel):
         winid = self.winid
         if lfopt.file_numbered:
             setlocal(winid, "number")
-        #  setlocal(winid, "wrap")
-        #  setlocal(winid, "nobuflisted")
-        #  setlocal(winid, "buftype=nowrite")
-        #  setlocal(winid, "bufhidden=hide")
-        #  setlocal(winid, "undolevels=-1")
-        #  setlocal(winid, "noswapfile")
-        #  setlocal(winid, "nolist")
-        #  setlocal(winid, "norelativenumber")
-        #  setlocal(winid, "nospell")
-        #  setlocal(winid, "nofoldenable")
-        #  setlocal(winid, "foldmethod=manual")
-        #  setlocal(winid, "signcolumn=no")
         if self.path.stat().st_size < lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))

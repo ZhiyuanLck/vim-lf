@@ -33,6 +33,9 @@ let s:default_highlights = {
       \   ctermbg : "240",
       \   guibg : "#343d46",
       \   },
+      \ "vlf_hl_cursorline_v": #{
+      \   ctermbg : "12",
+      \   },
       \ "vlf_hl_border": #{
       \   ctermfg : "48",
       \   guifg : "#343d46",

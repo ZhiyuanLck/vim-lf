@@ -46,6 +46,7 @@ class Manager(object):
         self.is_quit = False
         self.is_cfile = False
         self.is_keep_open = False
+        self.mode = "normal"
         self._resolve(cwd)
         vimcmd("set laststatus=0")
         vimcmd("set t_ve=")
@@ -59,6 +60,14 @@ class Manager(object):
             self.cfile = Path(vimeval("expand('%:p')")).resolve()
         else:
             self.cwd = Path(cwd).resolve()
+
+    def _is_normal(self):
+        self._set_mode()
+        return self.mode == "normal"
+
+    def _is_visual(self):
+        self._set_mode()
+        return self.mode == "visual"
 
     @update_info
     def _create(self):
@@ -80,14 +89,41 @@ class Manager(object):
             self.middle_panel._index(self.cfile)
             self.middle_panel._cursorline()
 
+    def _get_path_list(self):
+        if self._is_visual():
+            path_list = self.v_block.selection()
+        elif self._is_normal():
+            path_list = [self.curpath]
+        return path_list
+
     def _action(self):
         while 1:
             action = vimeval("lf#action()")
             if self.is_quit:
                 break
 
+    def _set_mode(self):
+        self.mode = self.middle_panel.mode
+
+    def normal(self):
+        if self._is_visual():
+            self.v_block.quit()
+            self._set_mode()
+        self.middle_panel._cursorline()
+        self.is_keep_open = False
+
+    def select(self):
+        self.middle_panel.visual()
+        self.v_block = self.middle_panel.v_block
+
+    def change_active(self):
+        if self._is_visual():
+            self.v_block.change_active()
+
     @update_info
     def backward(self):
+        if self._is_visual():
+            return
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
             self.right_panel = DirPanel(self.curpath, 2)
@@ -98,6 +134,8 @@ class Manager(object):
 
     @update_info
     def forward(self):
+        if self._is_visual():
+            return
         if isinstance(self.right_panel, FilePanel):
             if not lfopt.auto_edit:
                 self._open(lfopt.auto_edit_cmd)
@@ -109,36 +147,58 @@ class Manager(object):
 
     @update_all
     def down(self):
-        self.middle_panel.move(down=True)
+        if self._is_visual():
+            self.v_block.down()
+        elif self._is_normal():
+            self.middle_panel.move(down=True)
 
     @update_all
     def up(self):
-        self.middle_panel.move(down=False)
+        if self._is_visual():
+            self.v_block.up()
+        elif self._is_normal():
+            self.middle_panel.move(down=False)
 
     @update_all
     def top(self):
-        self.middle_panel.jump(top=True)
+        if self._is_visual():
+            self.v_block.top()
+        elif self._is_normal():
+            self.middle_panel.jump(top=True)
 
     @update_all
     def bottom(self):
-        self.middle_panel.jump(top=False)
+        if self._is_visual():
+            self.v_block.bottom()
+        elif self._is_normal():
+            self.middle_panel.jump(top=False)
 
     @update_all
     def scrollup(self):
-        self.middle_panel.scroll(down=False)
+        if self._is_visual():
+            self.v_block.scroll_up()
+        elif self._is_normal():
+            self.middle_panel.scroll(down=False)
 
     @update_all
     def scrolldown(self):
-        self.middle_panel.scroll(down=True)
+        if self._is_visual():
+            self.v_block.scroll_down()
+        elif self._is_normal():
+            self.middle_panel.scroll(down=True)
 
     @update_all
     def touch(self):
+        if self._is_visual():
+            return
         self.cli = CliPanel("FileName: ")
         self.cli.input()
         if self.cli.do:
             self.middle_panel.touch(self.cli.cmd)
 
     def touch_edit(self):
+        if self._is_visual():
+            return
         self.cli = CliPanel("FileName: ")
         self.cli.input()
         if not self.cli.do:
@@ -153,47 +213,37 @@ class Manager(object):
         if self.is_keep_open:
             self._restore()
             self.is_keep_open = False
+        self.normal()
 
     @update_all
     def delete(self):
-        self.msg = MsgRemovePanel([self.curpath])
+        self.msg = MsgRemovePanel(self._get_path_list())
         self.msg.action()
         if not self.msg.do:
             return
-        for path in [self.curpath]:
+        for path in self._get_path_list():
             print(path.exists())
             try:
                 path.unlink()
             except FileNotFoundError:
                 print("File not find")
         self.middle_panel.refresh(keep_pos=False)
+        self.normal()
 
     def _open(self, cmd):
-        if not self.curpath.is_file():
-            return
-        print(self.is_keep_open, self.is_quit)
         if self.is_keep_open:
             self.right_panel.set_exist()
         else:
             self.is_quit = True
         self._close()
-        vimcmd("{} {}".format(cmd, self._cur_path()))
+        for path in self._get_path_list():
+            if not path.is_file():
+                continue
+            vimcmd("{} {}".format(cmd, str(path.resolve()).replace(' ', '\\ ')))
         if self.is_keep_open:
             self._restore()
             self.is_keep_open = False
-        #  resetg("wrap")
-        #  resetg("buflisted")
-        #  resetg("buftype")
-        #  resetg("bufhidden")
-        #  resetg("number")
-        #  resetg("undolevels")
-        #  resetg("swapfile")
-        #  resetg("list")
-        #  resetg("relativenumber")
-        #  resetg("spell")
-        #  resetg("foldenable")
-        #  resetg("foldmethod")
-        #  resetg("signcolumn")
+        self.normal()
 
     def edit(self):
         self._open("edit")
