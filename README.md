@@ -49,6 +49,10 @@ action          | key
 `open_right`    | `"L"`
 `open_tab`      | `"n"`
 `quit`          | `"q"`
+`keep_open`     | `"\<space>"`
+`select`        | `"v"`
+`normal`        | `"\<esc>"`
+`change_active` | `"o"`
 
 ## Cli action
 
