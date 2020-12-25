@@ -278,6 +278,7 @@ class DirPanel(Panel):
 
     def touch(self, name: str):
         file = self.cwd / name
+        logger.info("touch file {}".format(file))
         file.touch()
         self.refresh()
 

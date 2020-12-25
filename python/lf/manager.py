@@ -225,14 +225,41 @@ class Manager(object):
             self.middle_panel.scroll(down=True)
 
     @update_all
+    def delete(self):
+        logger.info("START deletion")
+        self.msg = MsgRemovePanel(self._get_path_list())
+        self.msg.action()
+        if not self.msg.do:
+            logger.info("action cancels")
+            return
+        path_list = self._get_path_list()
+        self._delete(path_list)
+        logger.info("END deletion")
+
+    def _delete(self, path_list):
+        for path in self._get_path_list():
+            file_or_dir = 'file' if path.is_file() else 'directory'
+            logger.info("delete {} {}".format(file_or_dir, path))
+            try:
+                path.unlink()
+                logger.info("deletion success")
+            except FileNotFoundError:
+                logger.error("deletion failed")
+                print("File not find")
+        self.middle_panel.refresh(keep_pos=False)
+        self.normal()
+
+    def copy(self):
+        pass
+
+    @update_all
     def touch(self):
         if self._is_select():
             return
         self.cli = CliPanel("FileName: ")
         self.cli.input()
         if self.cli.do:
-            logger.info("touch file {}".format(self.cli.cmd))
-            self.middle_panel.touch(self._escape_path(self.cli.cmd))
+            self.middle_panel.touch(self.cli.cmd)
         else:
             logger.info("action cancels")
 
@@ -256,27 +283,6 @@ class Manager(object):
             self._restore()
             self.is_keep_open = False
         self.normal()
-
-    @update_all
-    def delete(self):
-        logger.info("START deletion")
-        self.msg = MsgRemovePanel(self._get_path_list())
-        self.msg.action()
-        if not self.msg.do:
-            logger.info("action cancels")
-            return
-        for path in self._get_path_list():
-            file_or_dir = 'file' if path.is_file() else 'directory'
-            logger.info("delete {} {}".format(file_or_dir, path))
-            try:
-                path.unlink()
-                logger.info("deletion success")
-            except FileNotFoundError:
-                logger.error("deletion failed")
-                print("File not find")
-        self.middle_panel.refresh(keep_pos=False)
-        self.normal()
-        logger.info("END deletion")
 
     def _open(self, cmd):
         logger.info("START opening with command `{}`".format(cmd))
