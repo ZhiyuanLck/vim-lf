@@ -32,7 +32,7 @@ class Panel(object):
 class select(object):
     def __init__(self, panel):
         self.panel = panel
-        self.path_list = panel._get_path_list()
+        self.path_list = panel.get_path_list()
         self.max_len = len(self.path_list)
         self.start = panel.index
         self.end = panel.index
@@ -110,13 +110,13 @@ class select(object):
 
 class DirPanel(Panel):
     def __init__(self, cwd, number):
-        self.cwd = cwd.resolve()
+        self.cwd = cwd.resolve() if cwd is not None else None
         self.number = number
         self._set_attr()
         self.index = 0
         self.cursorline_id = None
-        self.text = None
-        self.path_list = None
+        self.text = []
+        self.path_list = []
         self.show_hidden = lfopt.show_hidden
         self._create_popup()
         self.mode = "normal"
@@ -148,9 +148,7 @@ class DirPanel(Panel):
     def _is_select(self):
         return self.mode == "select"
 
-    def _get_path_list(self):
-        if self.text is None:
-            return None
+    def get_path_list(self):
         return [line.path for line in self.text]
 
     def _glob(self):
@@ -160,7 +158,8 @@ class DirPanel(Panel):
     def _set_text(self):
         T = Text(self)
         self.text = T.text
-        vimcmd("call popup_settext({}, {})".format(self.winid, T.props))
+        props = [' ' * self.winwidth] if self.empty() else T.props
+        vimcmd("call popup_settext({}, {})".format(self.winid, props))
 
     def _cursorline(self):
         """
@@ -169,7 +168,10 @@ class DirPanel(Panel):
         if self.cursorline_id is not None:
             vimcmd("call clearmatches({})".format(self.winid))
             self.cursorline_id = None
-        if self._empty():
+        if self.empty() and self.is_middle:
+            self.cursorline_id = vimeval(
+                    "matchaddpos('vlf_hl_cursorline_%d', [%s], 100, -1, #{window: %s})"
+                    % (self.number, 1, self.winid))
             return
         self.cursorline_id = vimeval(
                 "matchaddpos('vlf_hl_cursorline_%d', [%s], 100, -1, #{window: %s})"
@@ -177,7 +179,7 @@ class DirPanel(Panel):
         vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.index + 1))
 
     def select(self):
-        if self._empty():
+        if self.empty():
             return
         self.v_block = select(self)
         self.mode = 'select'
@@ -186,12 +188,12 @@ class DirPanel(Panel):
         """
         correct index when text list changed such as refesh, delete, paste
         """
-        if self.index < 0:
+        if self.index <= 0:
             self.index = 0
         elif self.index >= self._len():
             self.index = self._len() - 1
 
-    def _empty(self):
+    def empty(self):
         return self.text == []
 
     def _index(self, item):
@@ -205,7 +207,7 @@ class DirPanel(Panel):
             self.index = 0
 
     def curpath(self):
-        return None if self._empty() else self.text[self.index].path
+        return None if self.empty() else self.text[self.index].path
 
     def refresh(self, keep_pos=True):
         if keep_pos:
@@ -233,7 +235,7 @@ class DirPanel(Panel):
         return True
 
     def forward(self):
-        if self._empty():
+        if self.empty():
             logger.warning("ignore empty directory {}".format(self.cwd))
             return
         curpath = self.curpath()
@@ -255,7 +257,7 @@ class DirPanel(Panel):
         return len(self.text)
 
     def jump(self, top=True):
-        if not self._empty():
+        if not self.empty():
             self.index = 0 if top else self._len() - 1
             self._cursorline()
             logger.info("cursor pos after jump: {}".format(self.index))
@@ -263,7 +265,7 @@ class DirPanel(Panel):
             logger.warning("ignore empty directory {}".format(self.cwd))
 
     def scroll(self, down=True):
-        if not self._empty():
+        if not self.empty():
             sign = 1 if down else -1
             self.index += sign * self.scroll_line
             self._correct_index()
@@ -330,7 +332,7 @@ class BaseShowPanel(Panel):
         vimcmd("call popup_settext({}, {})".format(self.winid, text))
 
     def clear(self):
-        self._settext('')
+        self._settext([])
 
 
 class InfoPanel(BaseShowPanel):
@@ -339,19 +341,22 @@ class InfoPanel(BaseShowPanel):
         self.manager = manager
 
     def _set_panel(self):
-        self.left = self.manager.left_panel
-        self.middle = self.manager.middle_panel
-        self.right = self.manager.right_panel
-        self.index = self.middle.index
-        self.text_list = self.middle.text
-        self.path = self.text_list[self.index].path.resolve()
+        path = self.manager.curpath
+        self.path = '' if path is None else path.resolve()
+        self.text_list = self.manager.middle_panel.text
         self.total = len(self.text_list)
+
+    def _empty(self):
+        return self.manager.empty()
+
+    def _index(self):
+        return self.manager.middle_panel.index
+
+    def _mode(self):
+        return self.manager.middle_panel.mode
 
     def info_path(self):
         self._set_panel()
-        if self.text_list == []:
-            self.clear()
-            return
         self._set_mode()
         self._set_sz()
         self._set_nr()
@@ -373,7 +378,7 @@ class InfoPanel(BaseShowPanel):
                 "col": bytelen(left_str) + 1,
                 "length": bytelen(self.mode),
                 }
-        prop_mode["type"] = "mode_" + self.middle.mode
+        prop_mode["type"] = "mode_" + self._mode()
         left_str += self.mode
         prop_path = {
                 "col": bytelen(left_str) + 1,
@@ -401,10 +406,12 @@ class InfoPanel(BaseShowPanel):
             self.keep = " {} ".format(lfopt.mode_keep_open)
         else:
             self.keep = ''
-        self.mode = " {} ".format(getattr(lfopt, "mode_{}".format(self.middle.mode)))
+        self.mode = " {} ".format(getattr(lfopt, "mode_{}".format(self._mode())))
 
     def _set_sz(self):
         self.sz = ''
+        if self._empty():
+            return
         if self.path.is_file():
             sz = self.path.stat().st_size
             if sz < 2 ** 10:
@@ -421,15 +428,20 @@ class InfoPanel(BaseShowPanel):
             self.sz = " {} {} ".format(sz, unit)
 
     def _set_nr(self):
-        if isinstance(self.right, DirPanel):
-            lines = len(self.right.text)
-        elif isinstance(self.right, FilePanel):
-            lines = self.right.lines
-        self.nr = " {}/{}:{} ".format(self.index + 1, self.total, lines)
+        if self._empty():
+            self.nr = ' 0/0 '
+            return
+        lines = 0
+        right = self.manager.right_panel
+        if isinstance(right, DirPanel):
+            lines = len(right.text)
+        elif isinstance(right, FilePanel):
+            lines = right.lines
+        self.nr = " {}/{}:{} ".format(self._index() + 1, self.total, lines)
 
     def _set_path(self):
         valid_len = self.winwidth - len(self.nr) - len(self.sz) - len(self.keep) - len(self.mode)
-        path_str = " {} ".format(str(self.path))
+        path_str = '' if self._empty() else " {} ".format(str(self.path))
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 4] + '... '
         blank = valid_len - dplen(path_str)

@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
@@ -118,7 +119,12 @@ class Manager(object):
             self.middle_panel._cursorline()
         logger.info("initialize cursor pos as {}".format(self.middle_panel.index))
 
-    def _get_path_list(self):
+    def empty(self):
+        return self.middle_panel.empty()
+
+    def _get_path_list(self, is_all=False):
+        if is_all:
+            return self.middle_panel.get_path_list()
         if self._is_select():
             path_list = self.v_block.selection()
         elif self._is_normal():
@@ -226,28 +232,39 @@ class Manager(object):
 
     @update_all
     def delete(self):
+        self._delete(is_all=False)
+
+    @update_all
+    def delete_all(self):
+        self._delete(is_all=True)
+
+    def _delete(self, is_all):
+        if self.empty():
+            return
+        path = self._get_path_list(is_all)
+        if path == []:  # do nothing
+            return
         logger.info("START deletion")
-        self.msg = MsgRemovePanel(self._get_path_list())
+        self.msg = MsgRemovePanel(self._get_path_list(is_all))
         self.msg.action()
         if not self.msg.do:
             logger.info("action cancels")
             return
-        path_list = self._get_path_list()
-        self._delete(path_list)
-        logger.info("END deletion")
-
-    def _delete(self, path_list):
-        for path in self._get_path_list():
+        for path in self._get_path_list(is_all):
             file_or_dir = 'file' if path.is_file() else 'directory'
             logger.info("delete {} {}".format(file_or_dir, path))
             try:
-                path.unlink()
+                if path.is_file():
+                    path.unlink()
+                elif path.is_dir():
+                    shutil.rmtree(path)
                 logger.info("deletion success")
             except FileNotFoundError:
                 logger.error("deletion failed")
                 print("File not find")
         self.middle_panel.refresh(keep_pos=False)
         self.normal()
+        logger.info("END deletion")
 
     def copy(self):
         pass
