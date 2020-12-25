@@ -29,30 +29,30 @@ Two styles of shortcut is supported:
 1. single key such as `a, b, c, ..., A, B, ..., 1, 2, ..., -, =, ...`
 2. vim special key such as `"\<c-l>", "\<esc>", "\<s-f2>"`, see all special keys by `:h key-notation`. Note that `<key>` must be leaded with `\` and be **quoted with `""`** rather than single quotes.
 
-action          | key
-------          | ---
-`up`            | `"k"`
-`down`          | `"j"`
-`top`           | `"g"`
-`bottom`        | `"G"`
-`scrollup`      | `"\<c-k>"`
-`scrolldown`    | `"\<c-j>"`
-`backward`      | `"h"`
-`forward`       | `"l"`
-`toggle_hidden` | `"s"`
-`edit`          | `["e", "\<cr>"]`
-`touch_edit`    | `"t"`
-`touch`         | `"T"`
-`open_top`      | `"K"`
-`open_bottom`   | `"J"`
-`open_left`     | `"H"`
-`open_right`    | `"L"`
-`open_tab`      | `"n"`
-`quit`          | `"q"`
-`keep_open`     | `"\<space>"`
-`select`        | `"v"`
-`normal`        | `"\<esc>"`
-`change_active` | `"o"`
+action             | key
+------             | ---
+`up`               | `"k"`
+`down`             | `"j"`
+`top`              | `"g"`
+`bottom`           | `"G"`
+`scrollup`         | `"\<c-k>"`
+`scrolldown`       | `"\<c-j>"`
+`backward`         | `"h"`
+`forward`          | `"l"`
+`toggle_hidden`    | `"s"`
+`edit`             | `["e", "\<cr>"]`
+`touch_edit`       | `"t"`
+`touch`            | `"T"`
+`open_top`         | `"K"`
+`open_bottom`      | `"J"`
+`open_left`        | `"H"`
+`open_right`       | `"L"`
+`open_tab`         | `"n"`
+`quit`             | `"q"`
+`change_keep_open` | `"\<space>"`
+`select`           | `"v"`
+`normal`           | `"\<esc>"`
+`change_active`    | `"o"`
 
 ## Cli action
 

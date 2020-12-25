@@ -29,7 +29,7 @@ class Panel(object):
         setlocal(self.winid, "wincolor={}".format(lfopt.wincolor))
 
 
-class Visual(object):
+class select(object):
     def __init__(self, panel):
         self.panel = panel
         self.path_list = panel._get_path_list()
@@ -145,8 +145,8 @@ class DirPanel(Panel):
     def _is_normal(self):
         return self.mode == "normal"
 
-    def _is_visual(self):
-        return self.mode == "visual"
+    def _is_select(self):
+        return self.mode == "select"
 
     def _get_path_list(self):
         if self.text is None:
@@ -176,11 +176,11 @@ class DirPanel(Panel):
                 % (self.number, self.index + 1, self.winid))
         vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.index + 1))
 
-    def visual(self):
+    def select(self):
         if self._empty():
             return
-        self.v_block = Visual(self)
-        self.mode = 'visual'
+        self.v_block = select(self)
+        self.mode = 'select'
 
     def _correct_index(self):
         """
@@ -351,17 +351,31 @@ class InfoPanel(BaseShowPanel):
         if self.text_list == []:
             self.clear()
             return
+        self._set_mode()
         self._set_sz()
         self._set_nr()
         self._set_path()
-        self.info = self.path_str_fill + self.sz + self.nr
+        self.info = self.keep + self.mode + self.path_str_fill + self.sz + self.nr
         self._settext_path()
-        #  self._settext([info])
 
     def _settext_path(self):
         opt = {"text": self.info}
-        prop_path = {
+        left_str = ''
+        prop_keep = {
                 "col": 1,
+                "length": bytelen(self.keep),
+                "type": "mode_keep_open",
+                }
+        if self.is_keep:
+            left_str += self.keep
+        prop_mode = {
+                "col": bytelen(left_str) + 1,
+                "length": bytelen(self.mode),
+                }
+        prop_mode["type"] = "mode_" + self.middle.mode
+        left_str += self.mode
+        prop_path = {
+                "col": bytelen(left_str) + 1,
                 "length": bytelen(self.path_str),
                 "type": "path",
                 }
@@ -375,8 +389,18 @@ class InfoPanel(BaseShowPanel):
                 "length": len(self.nr),
                 "type": "nr",
                 }
-        opt["props"] = [prop_path, prop_size, prop_nr]
+        opt["props"] = [prop_mode, prop_path, prop_size, prop_nr]
+        if self.is_keep:
+            opt["props"].append(prop_keep)
         self._settext([opt])
+
+    def _set_mode(self):
+        self.is_keep = self.manager.is_keep_open
+        if self.is_keep:
+            self.keep = " {} ".format(lfopt.mode_keep_open)
+        else:
+            self.keep = ''
+        self.mode = " {} ".format(getattr(lfopt, "mode_{}".format(self.middle.mode)))
 
     def _set_sz(self):
         self.sz = ''
@@ -403,7 +427,7 @@ class InfoPanel(BaseShowPanel):
         self.nr = " {}/{}:{} ".format(self.index + 1, self.total, lines)
 
     def _set_path(self):
-        valid_len = self.winwidth - len(self.nr) - len(self.sz)
+        valid_len = self.winwidth - len(self.nr) - len(self.sz) - len(self.keep) - len(self.mode)
         path_str = " {} ".format(str(self.path))
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 4] + '... '

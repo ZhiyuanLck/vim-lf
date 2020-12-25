@@ -71,10 +71,25 @@ let s:default_highlights = {
       \ "vlf_hl_msg_content": #{
       \   ctermfg : "215",
       \   },
+      \ "vlf_hl_info_mode_normal": #{
+      \   ctermfg : "255",
+      \   ctermbg : "238",
+      \   cterm: "bold",
+      \   },
+      \ "vlf_hl_info_mode_select": #{
+      \   ctermfg : "255",
+      \   ctermbg : "238",
+      \   cterm: "bold",
+      \   },
+      \ "vlf_hl_info_mode_keep_open": #{
+      \   ctermfg : "233",
+      \   ctermbg : "79",
+      \   cterm: "bold",
+      \   },
       \ }
 let s:prop_type = #{
       \ path: ["dir", "hidden_dir", "file", "hidden_file"],
-      \ info: ["size", "nr", "path"],
+      \ info: ["size", "nr", "path", "mode_normal", "mode_select", "mode_keep_open"],
       \ cli: ["prompt", "cursor"],
       \ msg: ["warning", "default", "content"],
       \ }

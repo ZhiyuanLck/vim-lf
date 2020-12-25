@@ -77,6 +77,10 @@ class Option(object):
         self.sort_dir_first = vimget('sort_dir_first', 1) == '1'
         self.sort_ignorecase = vimget('sort_ignorecase', 1) == '1'
         self.file_numbered = vimget('file_numbered', 0) == '1'
+        self.auto_keep_open = vimget('auto_keep_open', 0) == '1'
+        self.mode_normal = vimget('mode_normal', "'NORMAL'")
+        self.mode_select = vimget('mode_select', "'SELECT'")
+        self.mode_keep_open = vimget('mode_keep_open', "'KEEP'")
         self._set_path()
 
     def _set_path(self):

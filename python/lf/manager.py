@@ -92,9 +92,9 @@ class Manager(object):
         self._set_mode()
         return self.mode == "normal"
 
-    def _is_visual(self):
+    def _is_select(self):
         self._set_mode()
-        return self.mode == "visual"
+        return self.mode == "select"
 
     @update_info
     def _create(self):
@@ -119,7 +119,7 @@ class Manager(object):
         logger.info("initialize cursor pos as {}".format(self.middle_panel.index))
 
     def _get_path_list(self):
-        if self._is_visual():
+        if self._is_select():
             path_list = self.v_block.selection()
         elif self._is_normal():
             path_list = [self.curpath]
@@ -134,27 +134,30 @@ class Manager(object):
     def _set_mode(self):
         self.mode = self.middle_panel.mode
 
+    @update_info
     def normal(self):
         logger.info("current mode is {}, now try to back to normal mode".format(self.mode))
         if self.is_quit:
             return
-        if self._is_visual():
+        if self._is_select():
             self.v_block.quit()
             self._set_mode()
         self.middle_panel._cursorline()
-        self.is_keep_open = False
+        if lfopt.auto_keep_open:
+            self.is_keep_open = False
 
+    @update_info
     def select(self):
-        self.middle_panel.visual()
+        self.middle_panel.select()
         self.v_block = self.middle_panel.v_block
 
     def change_active(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.change_active()
 
     @update_info
     def backward(self):
-        if self._is_visual():
+        if self._is_select():
             return
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
@@ -167,7 +170,7 @@ class Manager(object):
 
     @update_info
     def forward(self):
-        if self._is_visual():
+        if self._is_select():
             return
         if isinstance(self.right_panel, FilePanel):
             if not lfopt.auto_edit:
@@ -181,49 +184,49 @@ class Manager(object):
 
     @update_all
     def down(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.down()
         elif self._is_normal():
             self.middle_panel.move(down=True)
 
     @update_all
     def up(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.up()
         elif self._is_normal():
             self.middle_panel.move(down=False)
 
     @update_all
     def top(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.top()
         elif self._is_normal():
             self.middle_panel.jump(top=True)
 
     @update_all
     def bottom(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.bottom()
         elif self._is_normal():
             self.middle_panel.jump(top=False)
 
     @update_all
     def scrollup(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.scroll_up()
         elif self._is_normal():
             self.middle_panel.scroll(down=False)
 
     @update_all
     def scrolldown(self):
-        if self._is_visual():
+        if self._is_select():
             self.v_block.scroll_down()
         elif self._is_normal():
             self.middle_panel.scroll(down=True)
 
     @update_all
     def touch(self):
-        if self._is_visual():
+        if self._is_select():
             return
         self.cli = CliPanel("FileName: ")
         self.cli.input()
@@ -234,7 +237,7 @@ class Manager(object):
             logger.info("action cancels")
 
     def touch_edit(self):
-        if self._is_visual():
+        if self._is_select():
             return
         self.cli = CliPanel("FileName: ")
         self.cli.input()
@@ -290,10 +293,12 @@ class Manager(object):
             vimcmd("{} {}".format(cmd, self._escape_path(path)))
         if self.is_keep_open:
             self._restore()
-            self.is_keep_open = False
+            if lfopt.auto_keep_open:
+                self.is_keep_open = False
             self.normal()
         elif is_open:
-            self.right_panel.set_exist()
+            if isinstance(self.right_panel, FilePanel):
+                self.right_panel.set_exist()
             self._close()
             self.is_quit = True
         else:
@@ -322,8 +327,9 @@ class Manager(object):
         self._close()
         self.is_quit = True
 
-    def keep_open(self):
-        self.is_keep_open = True
+    @update_info
+    def change_keep_open(self):
+        self.is_keep_open = not self.is_keep_open
 
     @update_info_path
     def toggle_hidden(self):
