@@ -341,7 +341,7 @@ class InfoPanel(BaseShowPanel):
         self.manager = manager
 
     def _set_panel(self):
-        path = self.manager.curpath
+        path = self.manager._curpath()
         self.path = '' if path is None else path.resolve(True)
         self.text_list = self.manager.middle_panel.text
         self.total = len(self.text_list)

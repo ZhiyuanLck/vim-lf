@@ -6,7 +6,6 @@ from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .panel import MsgRemovePanel
 from .option import lfopt
-#  from .logger import logger
 
 
 logger = logging.getLogger()
@@ -26,7 +25,6 @@ def _update(fun, ignore):
         fun(*args, **kwargs)
         self = args[0]
         if not ignore:
-            self._set_curpath()
             self._change_right()
         self.info_panel.info_path()
     return wrapper
@@ -40,7 +38,6 @@ def update_cursor(fun):
     def wrapper(*args, **kwargs):
         fun(*args, **kwargs)
         self = args[0]
-        self._set_curpath()
         self._change_right()
     return wrapper
 
@@ -103,7 +100,6 @@ class Manager(object):
         self.border_panel = BorderPanel()
         self._init_middle()
         self._init_left()
-        self._set_curpath()
         self._change_right(True)
         self.info_panel = InfoPanel(self)
 
@@ -128,7 +124,7 @@ class Manager(object):
         if self._is_select():
             path_list = self.v_block.selection()
         elif self._is_normal():
-            path_list = [self.curpath]
+            path_list = [self._curpath()]
         return path_list
 
     def _action(self):
@@ -167,12 +163,11 @@ class Manager(object):
             return
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
-            self.right_panel = DirPanel(self.curpath, 2)
+            self.right_panel = DirPanel(self._curpath(), 2)
         self._copy_panel(self.middle_panel, self.right_panel)
         self._copy_panel(self.left_panel, self.middle_panel)
         self.left_panel.backward()
-        self._set_curpath()
-        logger.info("change cwd to {}".format(self.curpath))
+        logger.info("change cwd to {}".format(self._curpath()))
 
     @update_info
     def forward(self):
@@ -184,9 +179,8 @@ class Manager(object):
         else:
             self._copy_panel(self.middle_panel, self.left_panel)
             self._copy_panel(self.right_panel, self.middle_panel)
-            self._set_curpath()
             self._change_right()
-        logger.info("change cwd to {}".format(self.curpath))
+        logger.info("change cwd to {}".format(self._curpath()))
 
     @update_all
     def down(self):
@@ -265,6 +259,10 @@ class Manager(object):
         self.middle_panel.refresh(keep_pos=False)
         self.normal()
         logger.info("END deletion")
+
+    def rename(self):
+        if self.empty() or self._is_select():
+            return
 
     def copy(self):
         pass
@@ -378,26 +376,23 @@ class Manager(object):
     def _right_is_dir(self):
         return isinstance(self.right_panel, DirPanel)
 
-    def _cur_path(self):
-        return str(self.curpath.resolve(True)).replace(' ', '\\ ')
-
-    def _set_curpath(self):
-        self.curpath = self.middle_panel.curpath()
+    def _curpath(self):
+        return self.middle_panel.curpath()
 
     def _show_dir(self):
-        if self.curpath is None:
+        if self._curpath() is None:
             return True
-        return self.curpath.is_dir()
+        return self._curpath().is_dir()
 
     def _change_right(self, init=False):
         if not init:
             self.right_panel.close()
         if self._show_dir():
-            self.right_panel = DirPanel(self.curpath, 2)
-            if self.curpath is not None:
+            self.right_panel = DirPanel(self._curpath(), 2)
+            if self._curpath() is not None:
                 self.right_panel.refresh(keep_pos=False)
         else:
-            self.right_panel = FilePanel(self.curpath)
+            self.right_panel = FilePanel(self._curpath())
 
     def _close(self):
         logger.info("close panels")
