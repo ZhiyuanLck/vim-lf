@@ -1,9 +1,13 @@
+import logging
 from copy import copy
 from operator import attrgetter
 from .utils import vimeval, vimcmd
 from .utils import setlocal, winexec, dplen, bytelen
 from .text import Text, SimpleLine
 from .option import lfopt
+
+
+logger = logging.getLogger()
 
 
 class Panel(object):

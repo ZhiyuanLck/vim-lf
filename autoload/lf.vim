@@ -7,6 +7,8 @@ cwd = Path(cwd) / '..' / 'python'
 cwd = cwd.resolve()
 sys.path.insert(0, str(cwd))
 from lf.manager import *
+import logging
+logger = logging.getLogger()
 END
 
 function! lf#start(cwd) abort
@@ -27,6 +29,11 @@ function! s:action(runner, default_action) abort
   let name = a:runner == '' ? 'main' : a:runner
   exec printf("let action = get(g:vlf_mapping_%s, ch, '%s')", name, a:default_action)
   let member = a:runner == '' ? '' : a:runner.'.'
+  if a:runner == ''
+    exec g:vlf_py printf("logger.info('<{}_action: %s>'.format(vlf_manager.mode))", action)
+  else
+    exec g:vlf_py printf("logger.info('<%s_action: %s>'", name, action)
+  endif
   exec g:vlf_py printf("vlf_manager.%s%s()", member, action)
   return action
 endfunction

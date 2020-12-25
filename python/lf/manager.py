@@ -1,10 +1,22 @@
+import logging
 from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .panel import MsgRemovePanel
 from .option import lfopt
-from .logger import logger
+#  from .logger import logger
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(lfopt.log_path)
+formatter = logging.Formatter(
+        '[%(asctime)s] %(levelname)s - %(message)s (%(filename)s:%(lineno)s)',
+        '%Y-%m-%d %H:%M:%S'
+        )
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 def _update(fun, ignore):
@@ -51,7 +63,7 @@ class Manager(object):
             lfopt.log_path.unlink()
 
     def start(self, cwd):
-        logger.normal.info("start manager")
+        logger.info("start manager")
         self.is_quit = False
         self.is_cfile = False
         self.is_keep_open = False
@@ -69,9 +81,12 @@ class Manager(object):
             self.cfile = Path(vimeval("expand('%:p')")).resolve()
         else:
             self.cwd = Path(cwd).resolve()
+        logger.info("init cwd as {}".format(self.cwd))
 
     def _escape_path(self, path):
-        return str(path.resolve()).replace(' ', '\\ ')
+        path_str = str(path.resolve()).replace(' ', '\\ ')
+        logger.info("final path string is {}".format(path_str))
+        return path_str
 
     def _is_normal(self):
         self._set_mode()
@@ -83,6 +98,7 @@ class Manager(object):
 
     @update_info
     def _create(self):
+        logger.info("init UI")
         self.border_panel = BorderPanel()
         self._init_middle()
         self._init_left()
@@ -100,6 +116,7 @@ class Manager(object):
         if self.is_cfile:
             self.middle_panel._index(self.cfile)
             self.middle_panel._cursorline()
+        logger.info("initialize cursor pos as {}".format(self.middle_panel.index))
 
     def _get_path_list(self):
         if self._is_visual():
@@ -118,6 +135,7 @@ class Manager(object):
         self.mode = self.middle_panel.mode
 
     def normal(self):
+        logger.info("current mode is {}, now try to back to normal mode".format(self.mode))
         if self.is_quit:
             return
         if self._is_visual():
@@ -145,6 +163,7 @@ class Manager(object):
         self._copy_panel(self.left_panel, self.middle_panel)
         self.left_panel.backward()
         self._set_curpath()
+        logger.info("change cwd to {}".format(self.curpath))
 
     @update_info
     def forward(self):
@@ -158,6 +177,7 @@ class Manager(object):
             self._copy_panel(self.right_panel, self.middle_panel)
             self._set_curpath()
             self._change_right()
+        logger.info("change cwd to {}".format(self.curpath))
 
     @update_all
     def down(self):
@@ -208,7 +228,10 @@ class Manager(object):
         self.cli = CliPanel("FileName: ")
         self.cli.input()
         if self.cli.do:
-            self.middle_panel.touch(self.cli.cmd)
+            logger.info("touch file {}".format(self.cli.cmd))
+            self.middle_panel.touch(self._escape_path(self.cli.cmd))
+        else:
+            logger.info("action cancels")
 
     def touch_edit(self):
         if self._is_visual():
@@ -216,14 +239,16 @@ class Manager(object):
         self.cli = CliPanel("FileName: ")
         self.cli.input()
         if not self.cli.do:
+            logger.info("action cancels")
             return
         path = self.middle_panel.cwd.resolve() / self.cli.cmd
+        logger.info("edit file {}".format(path))
         if self.is_keep_open:
             self.right_panel.set_exist()
         else:
             self.is_quit = True
         self._close()
-        vimcmd("edit {}".format(path))
+        vimcmd("edit {}".format(self._escape_path(path)))
         if self.is_keep_open:
             self._restore()
             self.is_keep_open = False
@@ -231,27 +256,35 @@ class Manager(object):
 
     @update_all
     def delete(self):
+        logger.info("START deletion")
         self.msg = MsgRemovePanel(self._get_path_list())
         self.msg.action()
         if not self.msg.do:
+            logger.info("action cancels")
             return
         for path in self._get_path_list():
-            print(path.exists())
+            file_or_dir = 'file' if path.is_file() else 'directory'
+            logger.info("delete {} {}".format(file_or_dir, path))
             try:
                 path.unlink()
+                logger.info("deletion success")
             except FileNotFoundError:
                 print("File not find")
         self.middle_panel.refresh(keep_pos=False)
         self.normal()
+        logger.info("END deletion")
 
     def _open(self, cmd):
+        logger.info("START opening with command `{}`".format(cmd))
         if self.is_keep_open:
             self.right_panel.set_exist()
             self._close()
         is_open = False
         for path in self._get_path_list():
             if not path.is_file():
+                logger.info("ignore directory {}".format(path))
                 continue
+            logger.info("open file {}".format(path))
             is_open = True
             vimcmd("{} {}".format(cmd, self._escape_path(path)))
         if self.is_keep_open:
@@ -263,6 +296,7 @@ class Manager(object):
             self.is_quit = True
         else:
             self.normal()
+        logger.info("END opening")
 
     def edit(self):
         self._open("edit")
@@ -301,6 +335,7 @@ class Manager(object):
 
     @update_info_path
     def _restore(self):
+        logger.info("restore UI")
         self.border_panel = BorderPanel()
         self.left_panel._create_popup()
         self.left_panel.refresh()
@@ -334,6 +369,7 @@ class Manager(object):
             self.right_panel = FilePanel(self.curpath)
 
     def _close(self):
+        logger.info("close panels")
         self.border_panel.close()
         self.info_panel.close()
         self.left_panel.close()
