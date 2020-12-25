@@ -287,7 +287,7 @@ class DirPanel(Panel):
 
 class FilePanel(Panel):
     def __init__(self, path):
-        self.path = path.resolve()
+        self.path = path.resolve(True)
         self._create()
         self._linenr()
         self._set_option()
@@ -342,7 +342,7 @@ class InfoPanel(BaseShowPanel):
 
     def _set_panel(self):
         path = self.manager.curpath
-        self.path = '' if path is None else path.resolve()
+        self.path = '' if path is None else path.resolve(True)
         self.text_list = self.manager.middle_panel.text
         self.total = len(self.text_list)
 

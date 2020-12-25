@@ -288,7 +288,7 @@ class Manager(object):
         if not self.cli.do:
             logger.info("action cancels")
             return
-        path = self.middle_panel.cwd.resolve() / self.cli.cmd
+        path = self.middle_panel.cwd.resolve(True) / self.cli.cmd
         logger.info("edit file {}".format(path))
         if self.is_keep_open:
             self.right_panel.set_exist()
@@ -379,7 +379,7 @@ class Manager(object):
         return isinstance(self.right_panel, DirPanel)
 
     def _cur_path(self):
-        return str(self.curpath.resolve()).replace(' ', '\\ ')
+        return str(self.curpath.resolve(True)).replace(' ', '\\ ')
 
     def _set_curpath(self):
         self.curpath = self.middle_panel.curpath()
