@@ -269,6 +269,7 @@ class Manager(object):
                 path.unlink()
                 logger.info("deletion success")
             except FileNotFoundError:
+                logger.error("deletion failed")
                 print("File not find")
         self.middle_panel.refresh(keep_pos=False)
         self.normal()
@@ -282,7 +283,7 @@ class Manager(object):
         is_open = False
         for path in self._get_path_list():
             if not path.is_file():
-                logger.info("ignore directory {}".format(path))
+                logger.warning("ignore directory {}".format(path))
                 continue
             logger.info("open file {}".format(path))
             is_open = True

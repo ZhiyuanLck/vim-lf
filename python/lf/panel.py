@@ -40,6 +40,7 @@ class Visual(object):
         self.id_list = []
         self.is_add = True
         self._update()
+        logger.info("record pos: [{}, {}]".format(self.start, self.end))
 
     def _winid(self):
         return self.panel.winid
@@ -77,6 +78,7 @@ class Visual(object):
     def change_active(self):
         self.start, self.end = self.end, self.start
         self._update()
+        logger.info("record pos: [{}, {}]".format(self.start, self.end))
 
     def _move(self, index):
         self.end = index
@@ -85,6 +87,7 @@ class Visual(object):
         elif self.end < 0:
             self.end = 0
         self._update()
+        logger.info("record pos: [{}, {}]".format(self.start, self.end))
 
     def down(self):
         self._move(self.end + 1)
@@ -109,6 +112,7 @@ class DirPanel(Panel):
     def __init__(self, cwd, number):
         self.cwd = cwd.resolve()
         self.number = number
+        self._set_attr()
         self.index = 0
         self.cursorline_id = None
         self.text = None
@@ -119,6 +123,11 @@ class DirPanel(Panel):
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         winheight = vimeval("winheight({})".format(self.winid), 1)
         self.scroll_line = winheight // 2
+
+    def _set_attr(self):
+        name_list = ["left", "middle", "right"]
+        self.name = name_list[self.number]
+        self.is_middle = self.number == 1
 
     def _create_popup(self):
         if self.number == 0:
@@ -131,6 +140,7 @@ class DirPanel(Panel):
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         vimcmd("call lf#colorscheme#path_prop({})".format(self.bufnr))
         self._set_wincolor()
+        logger.info("create {} pannel with winid: {}".format(self.name, self.winid))
 
     def _is_normal(self):
         return self.mode == "normal"
@@ -207,23 +217,29 @@ class DirPanel(Panel):
             self._glob()
             self._correct_index()
             self._cursorline()
+        if self.is_middle:
+            logger.info("cursor pos after refresh: {}".format(self.index))
 
     def backward(self):
         if self.cwd == self.cwd.parent:
+            logger.warning("current cwd is root directory, action cancels")
             return False
         item = copy(self.cwd)
         self.cwd = self.cwd.parent
         self._glob()
         self._index(item)
         self._cursorline()
+        logger.info("cursor pos after backward: {}".format(self.index))
         return True
 
     def forward(self):
         if self._empty():
+            logger.warning("ignore empty directory {}".format(self.cwd))
             return
         curpath = self.curpath()
         if curpath.is_dir():
             self.cwd = curpath
+        logger.info("cursor pos after forward: {}".format(self.index))
 
     def move(self, down=True):
         max = len(self.text)
@@ -232,6 +248,7 @@ class DirPanel(Panel):
         offset = 1 if down else -1
         self.index = (self.index + offset) % max
         self._cursorline()
+        logger.info("cursor pos after move: {}".format(self.index))
         return self.curpath()
 
     def _len(self):
@@ -241,6 +258,9 @@ class DirPanel(Panel):
         if not self._empty():
             self.index = 0 if top else self._len() - 1
             self._cursorline()
+            logger.info("cursor pos after jump: {}".format(self.index))
+        else:
+            logger.warning("ignore empty directory {}".format(self.cwd))
 
     def scroll(self, down=True):
         if not self._empty():
@@ -248,6 +268,9 @@ class DirPanel(Panel):
             self.index += sign * self.scroll_line
             self._correct_index()
             self._cursorline()
+            logger.info("cursor pos after scroll: {}".format(self.index))
+        else:
+            logger.warning("ignore empty directory {}".format(self.cwd))
 
     def toggle_hidden(self):
         self.show_hidden = not self.show_hidden
