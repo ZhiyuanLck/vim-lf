@@ -209,8 +209,12 @@ class DirPanel(Panel):
     def curpath(self):
         return None if self.empty() else self.text[self.index].path
 
-    def refresh(self, keep_pos=True):
-        if keep_pos:
+    def refresh(self, keep_pos=True, item=None):
+        if item is not None:
+            self._glob()
+            self._index(item)
+            self._cursorline()
+        elif keep_pos:
             item = self.curpath()
             self._glob()
             self._index(item)

@@ -34,21 +34,6 @@ update_all = partial(_update, ignore=False)
 update_info = partial(_update, ignore=True)
 
 
-def update_cursor(fun):
-    def wrapper(*args, **kwargs):
-        fun(*args, **kwargs)
-        self = args[0]
-        self._change_right()
-    return wrapper
-
-
-def update_info_path(fun):
-    def wrapper(*args, **kwargs):
-        fun(*args, **kwargs)
-        args[0].info_panel.info_path()
-    return wrapper
-
-
 class Manager(object):
     def __init__(self):
         vimcmd("call lf#colorscheme#highlight()")
@@ -260,9 +245,18 @@ class Manager(object):
         self.normal()
         logger.info("END deletion")
 
+    @update_all
     def rename(self):
         if self.empty() or self._is_select():
             return
+        self.cli = CliPanel("Newname: ")
+        self.cli.input()
+        if not self.cli.do:
+            logger.info("action cancels")
+            return
+        target = self.middle_panel.cwd / self.cli.cmd
+        self._curpath().rename(target)
+        self.middle_panel.refresh(item=target)
 
     def copy(self):
         pass
@@ -352,7 +346,7 @@ class Manager(object):
     def change_keep_open(self):
         self.is_keep_open = not self.is_keep_open
 
-    @update_info_path
+    @update_info
     def toggle_hidden(self):
         self.left_panel.toggle_hidden()
         self.middle_panel.toggle_hidden()
@@ -362,7 +356,7 @@ class Manager(object):
     def skip(self):
         pass
 
-    @update_info_path
+    @update_info
     def _restore(self):
         logger.info("restore UI")
         self.border_panel = BorderPanel()
