@@ -86,7 +86,6 @@ action     | key
 - ui
   - separator
   - devicon
-- selection mode
 
 
 [1]: https://github.com/ZhiyuanLck/images/blob/master/vim-lf/vim-lf.png
