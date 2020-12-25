@@ -32,7 +32,7 @@ function! s:action(runner, default_action) abort
   if a:runner == ''
     exec g:vlf_py printf("logger.info('<{}_action: %s>'.format(vlf_manager.mode))", action)
   else
-    exec g:vlf_py printf("logger.info('<%s_action: %s>'", name, action)
+    exec g:vlf_py printf("logger.info('<%s_action: %s>')", name, action)
   endif
   exec g:vlf_py printf("vlf_manager.%s%s()", member, action)
   return action

@@ -292,6 +292,7 @@ class Manager(object):
             self.is_keep_open = False
             self.normal()
         elif is_open:
+            self.right_panel.set_exist()
             self._close()
             self.is_quit = True
         else:
