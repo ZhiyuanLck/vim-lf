@@ -5,7 +5,7 @@ from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
 from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
 from .panel import MsgRemovePanel
-from .option import lfopt
+from .option import lfopt, Option
 
 
 logger = logging.getLogger()
@@ -99,6 +99,16 @@ class Manager(object):
             self.middle_panel._index(self.cfile)
             self.middle_panel._cursorline()
         logger.info("initialize cursor pos as {}".format(self.middle_panel.index))
+
+    def resize(self):
+        panels = ["border", "left", "middle", "right", "info", "cli", "msg"]
+        for panel in panels:
+            try:
+                getattr(self, panel + "_panel").resize(panel)
+            except:
+                pass
+        self.left_panel.refresh()
+        self.middle_panel.refresh()
 
     def empty(self):
         return self.middle_panel.empty()
@@ -224,9 +234,9 @@ class Manager(object):
         if path == []:  # do nothing
             return
         logger.info("START deletion")
-        self.msg = MsgRemovePanel(self._get_path_list(is_all))
-        self.msg.action()
-        if not self.msg.do:
+        self.msg_panel = MsgRemovePanel(self._get_path_list(is_all))
+        self.msg_panel.action()
+        if not self.msg_panel.do:
             logger.info("action cancels")
             return
         for path in self._get_path_list(is_all):
@@ -249,12 +259,12 @@ class Manager(object):
     def rename(self):
         if self.empty() or self._is_select():
             return
-        self.cli = CliPanel("Newname: ")
-        self.cli.input()
-        if not self.cli.do:
+        self.cli_panel = CliPanel("Newname: ")
+        self.cli_panel.input()
+        if not self.cli_panel.do:
             logger.info("action cancels")
             return
-        target = self.middle_panel.cwd / self.cli.cmd
+        target = self.middle_panel.cwd / self.cli_panel.cmd
         self._curpath().rename(target)
         self.middle_panel.refresh(item=target)
 
@@ -265,22 +275,22 @@ class Manager(object):
     def touch(self):
         if self._is_select():
             return
-        self.cli = CliPanel("FileName: ")
-        self.cli.input()
-        if self.cli.do:
-            self.middle_panel.touch(self.cli.cmd)
+        self.cli_panel = CliPanel("FileName: ")
+        self.cli_panel.input()
+        if self.cli_panel.do:
+            self.middle_panel.touch(self.cli_panel.cmd)
         else:
             logger.info("action cancels")
 
     def touch_edit(self):
         if self._is_select():
             return
-        self.cli = CliPanel("FileName: ")
-        self.cli.input()
-        if not self.cli.do:
+        self.cli_panel = CliPanel("FileName: ")
+        self.cli_panel.input()
+        if not self.cli_panel.do:
             logger.info("action cancels")
             return
-        path = self.middle_panel.cwd.resolve(True) / self.cli.cmd
+        path = self.middle_panel.cwd.resolve(True) / self.cli_panel.cmd
         logger.info("edit file {}".format(path))
         if self.is_keep_open:
             self.right_panel.set_exist()

@@ -109,10 +109,10 @@ class Option(object):
         self.outer_padding = [int(x) for x in outer_padding]
         border = vimget('border', [1, 1, 1, 1])
         self.border = [int(x) for x in border]
-        self.min_width = 80
+        self.min_width = 40
         self.min_height = 10
-        self.min_dir_width = 20
-        self.min_file_width = 40
+        self.min_dir_width = 10
+        self.min_file_width = 20
         self.zindex = {"border": 1,
                 "main:": 100,
                 "info": 200,

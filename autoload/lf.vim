@@ -22,11 +22,17 @@ function! lf#start(cwd) abort
   exec g:vlf_py printf("vlf_manager.start('%s')", cwd)
 endfunction
 
+let s:name_dict = {
+      \ '': 'name',
+      \ 'cli_panel': 'cli',
+      \ 'msg_panel': 'msg',
+      \ }
+
 function! s:action(runner, default_action) abort
   redraw
   let nr = getchar()
   let ch = type(nr) ? nr : nr2char(nr)
-  let name = a:runner == '' ? 'main' : a:runner
+  let name = a:runner == '' ? 'main' : s:name_dict[a:runner]
   exec printf("let action = get(g:vlf_mapping_%s, ch, '%s')", name, a:default_action)
   let member = a:runner == '' ? '' : a:runner.'.'
   if a:runner == ''
@@ -43,11 +49,11 @@ function! lf#action() abort
 endfunction
 
 function! lf#cli() abort
-  return s:action('cli', 'add')
+  return s:action('cli_panel', 'add')
 endfunction
 
 function! lf#msg() abort
-  return s:action('msg', 'skip')
+  return s:action('msg_panel', 'skip')
 endfunction
 
 function! lf#check_log() abort
@@ -56,4 +62,8 @@ endfunction
 
 function! lf#reset_log() abort
   exec g:vlf_py "vlf_manager.reset_log()"
+endfunction
+
+function! lf#resize() abort
+  exec g:vlf_py "vlf_manager.resize()"
 endfunction

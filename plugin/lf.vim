@@ -81,6 +81,7 @@ call s:init_action_main("change_keep_open", "\<space>")
 call s:init_action_main("select", "v")
 call s:init_action_main("normal", "\<esc>")
 call s:init_action_main("change_active", "o")
+call s:init_action_main("resize", "R")
 
 call s:init_action_cli("done", "\<cr>")
 call s:init_action_cli("delete", ["\<bs>"])
@@ -100,4 +101,5 @@ command! -bar -nargs=0 LfLog call lf#check_log()
 augroup Vimlf
   autocmd!
   autocmd VimLeave * call lf#reset_log()
+  autocmd VimResized * call lf#resize()
 augroup END

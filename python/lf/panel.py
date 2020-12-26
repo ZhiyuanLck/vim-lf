@@ -4,7 +4,7 @@ from operator import attrgetter
 from .utils import vimeval, vimcmd
 from .utils import setlocal, winexec, dplen, bytelen
 from .text import Text, SimpleLine
-from .option import lfopt
+from .option import lfopt, Option
 
 
 logger = logging.getLogger()
@@ -12,7 +12,8 @@ logger = logging.getLogger()
 
 class Panel(object):
     def __init__(self, name, has_prop=True):
-        self.winid = vimeval("popup_create([], {})".format(lfopt.popup(name)))
+        self.lfopt = Option()
+        self.winid = vimeval("popup_create([], {})".format(self.lfopt.popup(name)))
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
         self._set_wincolor()
@@ -26,7 +27,13 @@ class Panel(object):
         vimcmd("call popup_close({})".format(self.winid))
 
     def _set_wincolor(self):
-        setlocal(self.winid, "wincolor={}".format(lfopt.wincolor))
+        setlocal(self.winid, "wincolor={}".format(self.lfopt.wincolor))
+
+    def resize(self, name):
+        logger.info("resize panel {}".format(name))
+        self.lfopt = Option()
+        vimcmd("call popup_setoptions({}, {})".format(self.winid, self.lfopt.popup(name)))
+        self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
 
 
 class Select(object):
@@ -117,7 +124,8 @@ class DirPanel(Panel):
         self.cursorline_id = None
         self.text = []
         self.path_list = []
-        self.show_hidden = lfopt.show_hidden
+        self.lfopt = Option()
+        self.show_hidden = self.lfopt.show_hidden
         self._create_popup()
         self.mode = "normal"
         self.winwidth = vimeval("winwidth({})".format(self.winid), 1)
@@ -131,11 +139,11 @@ class DirPanel(Panel):
 
     def _create_popup(self):
         if self.number == 0:
-            opt = lfopt.popup("left")
+            opt = self.lfopt.popup("left")
         elif self.number == 1:
-            opt = lfopt.popup("middle")
+            opt = self.lfopt.popup("middle")
         else:
-            opt = lfopt.popup("right")
+            opt = self.lfopt.popup("right")
         self.winid = vimeval("popup_create([], {})".format(opt))
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         vimcmd("call lf#colorscheme#path_prop({})".format(self.bufnr))
@@ -291,13 +299,14 @@ class DirPanel(Panel):
 
 class FilePanel(Panel):
     def __init__(self, path):
+        self.lfopt = Option()
         self.path = path.resolve(True)
         self._create()
         self._linenr()
         self._set_option()
 
     def _create(self):
-        opt = lfopt.popup("right")
+        opt = self.lfopt.popup("right")
         self.buf_exist = vimeval("bufexists('{}') == v:true".format(self.path)) == '1'
         if self.buf_exist:
             vimcmd("noautocmd silent let winid = bufnr('{}')->popup_create({})".format(self.path, opt))
@@ -315,9 +324,9 @@ class FilePanel(Panel):
 
     def _set_option(self):
         winid = self.winid
-        if lfopt.file_numbered:
+        if self.lfopt.file_numbered:
             setlocal(winid, "number")
-        if self.path.stat().st_size < lfopt.max_file_size:
+        if self.path.stat().st_size < self.lfopt.max_file_size:
             winexec(self.winid, "filetype detect")
         self.bufnr = vimeval("winbufnr({})".format(self.winid))
         self._set_wincolor()
@@ -407,10 +416,10 @@ class InfoPanel(BaseShowPanel):
     def _set_mode(self):
         self.is_keep = self.manager.is_keep_open
         if self.is_keep:
-            self.keep = " {} ".format(lfopt.mode_keep_open)
+            self.keep = " {} ".format(self.lfopt.mode_keep_open)
         else:
             self.keep = ''
-        self.mode = " {} ".format(getattr(lfopt, "mode_{}".format(self._mode())))
+        self.mode = " {} ".format(getattr(self.lfopt, "mode_{}".format(self._mode())))
 
     def _set_sz(self):
         self.sz = ''
@@ -606,5 +615,6 @@ class MsgRemovePanel(BaseShowPanel):
 
 class BorderPanel(Panel):
     def __init__(self):
-        self.winid = vimeval("popup_create([], {})".format(lfopt.popup("border")))
+        self.lfopt = Option()
+        self.winid = vimeval("popup_create([], {})".format(self.lfopt.popup("border")))
         self._set_wincolor()
