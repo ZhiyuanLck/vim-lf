@@ -29,7 +29,7 @@ class Panel(object):
         setlocal(self.winid, "wincolor={}".format(lfopt.wincolor))
 
 
-class select(object):
+class Select(object):
     def __init__(self, panel):
         self.panel = panel
         self.path_list = panel.get_path_list()
@@ -181,7 +181,7 @@ class DirPanel(Panel):
     def select(self):
         if self.empty():
             return
-        self.v_block = select(self)
+        self.v_block = Select(self)
         self.mode = 'select'
 
     def _correct_index(self):
