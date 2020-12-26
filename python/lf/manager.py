@@ -341,6 +341,8 @@ class Manager(object):
     def quit(self):
         self._close()
         self.is_quit = True
+        vimcmd("set laststatus={}".format(lfopt.laststatus))
+        vimcmd("set t_ve={}".format(lfopt.t_ve))
 
     @update_info
     def change_keep_open(self):
@@ -395,8 +397,6 @@ class Manager(object):
         self.left_panel.close()
         self.middle_panel.close()
         self.right_panel.close()
-        vimcmd("set laststatus={}".format(lfopt.laststatus))
-        vimcmd("set t_ve={}".format(lfopt.t_ve))
 
     def _copy_panel(self, a: DirPanel, b: DirPanel):
         """
