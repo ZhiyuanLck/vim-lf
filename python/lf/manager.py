@@ -145,8 +145,13 @@ class Manager(object):
 
     @update_info
     def select(self):
+        if self.empty():
+            return
         self.middle_panel.select()
         self.v_block = self.middle_panel.v_block
+
+    def select_all(self):
+        self.select()
 
     def change_active(self):
         if self._is_select():
