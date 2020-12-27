@@ -82,6 +82,11 @@ class Select(object):
             #  self.panel.index = self.start if self.start < self.end else self.end
             #  self.panel.refresh(keep_pos=False)
 
+    def select_all(self):
+        self.start = 0
+        self.end = self.max_len - 1
+        self._update()
+
     def change_active(self):
         self.start, self.end = self.end, self.start
         self._update()

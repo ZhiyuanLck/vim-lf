@@ -146,12 +146,17 @@ class Manager(object):
     @update_info
     def select(self):
         if self.empty():
+            logger.info("empty directory, action cancels")
             return
         self.middle_panel.select()
         self.v_block = self.middle_panel.v_block
 
     def select_all(self):
+        if self.empty():
+            logger.info("empty directory, action cancels")
+            return
         self.select()
+        self.v_block.select_all()
 
     def change_active(self):
         if self._is_select():
