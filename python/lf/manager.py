@@ -294,9 +294,9 @@ class Manager(object):
         logger.info("edit file {}".format(path))
         if self.is_keep_open:
             self.right_panel.set_exist()
+            self._close()
         else:
-            self.is_quit = True
-        self._close()
+            self.quit()
         vimcmd("edit {}".format(self._escape_path(path)))
         if self.is_keep_open:
             self._restore()
@@ -324,8 +324,7 @@ class Manager(object):
         elif is_open:
             if isinstance(self.right_panel, FilePanel):
                 self.right_panel.set_exist()
-            self._close()
-            self.is_quit = True
+            self.quit()
         else:
             self.normal()
         logger.info("END opening")
