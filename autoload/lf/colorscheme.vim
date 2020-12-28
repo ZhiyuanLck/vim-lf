@@ -81,6 +81,11 @@ let s:default_highlights = {
       \   ctermbg : "238",
       \   cterm: "bold",
       \   },
+      \ "vlf_hl_info_mode_filter": #{
+      \   ctermfg : "255",
+      \   ctermbg : "238",
+      \   cterm: "bold",
+      \   },
       \ "vlf_hl_info_mode_keep_open": #{
       \   ctermfg : "233",
       \   ctermbg : "79",
@@ -89,7 +94,8 @@ let s:default_highlights = {
       \ }
 let s:prop_type = #{
       \ path: ["dir", "hidden_dir", "file", "hidden_file"],
-      \ info: ["size", "nr", "path", "mode_normal", "mode_select", "mode_keep_open"],
+      \ info: ["size", "nr", "path", "mode_normal", "mode_select",
+      \   "mode_filter", "mode_keep_open"],
       \ cli: ["prompt", "cursor"],
       \ msg: ["warning", "default", "content"],
       \ }

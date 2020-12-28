@@ -80,6 +80,7 @@ class Option(object):
         self.auto_keep_open = vimget('auto_keep_open', 0) == '1'
         self.mode_normal = vimget('mode_normal', "'NORMAL'")
         self.mode_select = vimget('mode_select', "'SELECT'")
+        self.mode_filter = vimget('mode_filter', "'FILTER'")
         self.mode_keep_open = vimget('mode_keep_open', "'KEEP'")
         self._set_path()
 

@@ -73,12 +73,17 @@ class Manager(object):
         return path_str
 
     def _is_normal(self):
-        self._set_mode()
+        if not self._is_filter():
+            self._set_mode()
         return self.mode == "normal"
 
     def _is_select(self):
-        self._set_mode()
+        if not self._is_filter():
+            self._set_mode()
         return self.mode == "select"
+
+    def _is_filter(self):
+        return self.mode == "filter"
 
     @update_info
     def _create(self):
@@ -140,11 +145,14 @@ class Manager(object):
     @update_info
     def normal(self):
         logger.info("current mode is {}, now try to back to normal mode".format(self.mode))
-        if self.is_quit:
+        if self.is_quit: # if quit manager, no need to change mode
             return
         if self._is_select():
             self.v_block.quit()
-            self._set_mode()
+        elif self._is_filter():
+            self.search_panel.restore()
+            self._change_right()
+        self.mode = "normal"
         self.middle_panel._cursorline()
         if lfopt.auto_keep_open:
             self.is_keep_open = False
@@ -172,6 +180,8 @@ class Manager(object):
     def backward(self):
         if self._is_select():
             return
+        if self._is_filter():
+            self.normal()
         if isinstance(self.right_panel, FilePanel):
             self.right_panel.close()
             self.right_panel = DirPanel(self._curpath(), 2)
@@ -290,6 +300,10 @@ class Manager(object):
     def _restore_pos(self):
         vimcmd("call lf#restore_pos()")
 
+    @update_info
+    def manual_update_info(self):
+        pass
+
     @update_all
     def touch(self):
         if self._is_select():
@@ -373,7 +387,7 @@ class Manager(object):
 
     def regex_search(self):
         if self._is_select():
-            return
+            self.normal()
         self.search_panel = RegexSearchPanel(self)
         self.search_panel.input()
 

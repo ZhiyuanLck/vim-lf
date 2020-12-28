@@ -37,7 +37,7 @@ function! s:action(runner, default_action) abort
   exec printf("let action = get(g:vlf_mapping_%s, ch, '%s')", name, a:default_action)
   let member = a:runner == '' ? '' : a:runner.'.'
   if a:runner == ''
-    exec g:vlf_py printf("logger.info('<{}_action: %s>'.format(vlf_manager.mode))", action)
+    exec g:vlf_py printf("logger.info('<{}_mode_action: %s>'.format(vlf_manager.mode))", action)
   else
     exec g:vlf_py printf("logger.info('<%s_action: %s>')", name, action)
   endif

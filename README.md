@@ -51,8 +51,11 @@ action             | key
 `quit`             | `"q"`
 `change_keep_open` | `"\<space>"`
 `select`           | `"v"`
+`select_all`       | `"V"`
 `normal`           | `"\<esc>"`
 `change_active`    | `"o"`
+`resize`           | `"R"`
+`regex_search`     | `"/"`
 
 ## Cli action
 
@@ -74,9 +77,9 @@ action     | key
 
 ## Features to be supported
 - file operation
-  - copy, move, paste, rename
+  - copy, move, paste
   - undo
-- filter (regex/fuzzy) (current/recursive)
+- filter (fuzzy) (current/recursive)
   - filter directory
   - filter file
   - filter file with the same extension

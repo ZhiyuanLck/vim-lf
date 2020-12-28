@@ -23,6 +23,7 @@ call s:init_var("cache_path", "~/.vim/cache/vim-lf")
 call s:init_var("auto_keep_open", 0)
 call s:init_var("mode_normal", "NORMAL")
 call s:init_var("mode_select", "SELECT")
+call s:init_var("mode_filter", "FILTER")
 call s:init_var("mode_keep_open", "KEEP")
 call s:init_var("restore_pos", 1)
 

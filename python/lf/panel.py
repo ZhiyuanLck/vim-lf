@@ -385,7 +385,7 @@ class InfoPanel(BaseShowPanel):
         return self.manager.middle_panel.index
 
     def _mode(self):
-        return self.manager.middle_panel.mode
+        return self.manager.mode
 
     def _escape_path(self, path):
         return str(path).replace("\\\\", "\\")
@@ -602,6 +602,7 @@ class RegexSearchPanel(CliPanel):
     def _refresh(self):
         T, pos_list = self.regex_search.filter()
         self.middle.search_refresh(T)
+        self.manager._change_right()
 
     def restore(self):
         self.middle.refresh(index=self.save_index)
@@ -622,6 +623,8 @@ class RegexSearchPanel(CliPanel):
 
     def done(self):
         super().done()
+        self.manager.mode = "filter"
+        self.manager.info_panel.info_path()
 
     def add(self):
         super().add()
