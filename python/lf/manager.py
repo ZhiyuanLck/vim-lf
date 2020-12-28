@@ -1,5 +1,6 @@
 import logging
 import shutil
+import vim
 from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
@@ -26,6 +27,7 @@ def _update(fun, ignore):
         if not ignore:
             self._change_right()
         self.info_panel.info_path()
+        vimcmd("echo ''")
     return wrapper
 
 
@@ -123,7 +125,12 @@ class Manager(object):
 
     def _action(self):
         while 1:
-            action = vimeval("lf#action()")
+            try:
+                action = vimeval("lf#action()")
+            except vim.error as e:
+                logger.error("unexpected vim errors: {}".format(e))
+                vimsg("Error", "ignored unexpected vim error: {}".format(e))
+                continue
             if self.is_quit:
                 break
 
@@ -320,25 +327,29 @@ class Manager(object):
         if self.is_keep_open:
             self.right_panel.set_exist()
             self._close()
-        is_open = False
+        is_open = False # whether the file is opened
         for path in self._get_path_list():
             if not path.is_file():
                 logger.warning("ignore directory {}".format(path))
                 continue
             logger.info("open file {}".format(path))
-            is_open = True
-            vimcmd("{} {}".format(cmd, self._escape_path(path)))
-            self._restore_pos()
-        if self.is_keep_open:
+            try:
+                vimcmd("{} {}".format(cmd, self._escape_path(path)))
+                is_open = True
+                self._restore_pos()
+            except vim.error as e:
+                logger.error(e)
+        if self.is_keep_open: # keep_open, restore the panel
             self._restore()
             if lfopt.auto_keep_open:
                 self.is_keep_open = False
             self.normal()
+        # file is opened with no error, make sure file buffer is not wiped out! And then quit
         elif is_open:
             if isinstance(self.right_panel, FilePanel):
                 self.right_panel.set_exist()
             self.quit()
-        else:
+        else: # file open failed, back to normal mode
             self.normal()
         logger.info("END opening")
 

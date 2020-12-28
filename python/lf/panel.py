@@ -258,6 +258,7 @@ class DirPanel(Panel):
         self._index(item)
         self._cursorline()
         logger.info("cursor pos after backward: {}".format(self.index))
+        logger.info("current path is {}".format(self.curpath()))
         return True
 
     def forward(self):
@@ -268,6 +269,7 @@ class DirPanel(Panel):
         if curpath.is_dir():
             self.cwd = curpath
         logger.info("cursor pos after forward: {}".format(self.index))
+        logger.info("current path is {}".format(self.curpath()))
 
     def move(self, down=True):
         max = len(self.text)
@@ -277,6 +279,7 @@ class DirPanel(Panel):
         self.index = (self.index + offset) % max
         self._cursorline()
         logger.info("cursor pos after move: {}".format(self.index))
+        logger.info("current path is {}".format(self.curpath()))
         return self.curpath()
 
     def _len(self):
@@ -287,6 +290,7 @@ class DirPanel(Panel):
             self.index = 0 if top else self._len() - 1
             self._cursorline()
             logger.info("cursor pos after jump: {}".format(self.index))
+            logger.info("current path is {}".format(self.curpath()))
         else:
             logger.warning("ignore empty directory {}".format(self.cwd))
 
@@ -297,6 +301,7 @@ class DirPanel(Panel):
             self._correct_index()
             self._cursorline()
             logger.info("cursor pos after scroll: {}".format(self.index))
+            logger.info("current path is {}".format(self.curpath()))
         else:
             logger.warning("ignore empty directory {}".format(self.cwd))
 
@@ -611,11 +616,19 @@ class RegexSearchPanel(CliPanel):
         super().quit()
         self.restore()
 
+    def clear(self):
+        super().clear()
+        self.restore()
+
     def done(self):
         super().done()
 
     def add(self):
         super().add()
+        self._refresh()
+
+    def delete(self):
+        super().delete()
         self._refresh()
 
 
