@@ -382,6 +382,9 @@ class InfoPanel(BaseShowPanel):
     def _mode(self):
         return self.manager.middle_panel.mode
 
+    def _escape_path(self, path):
+        return str(path).replace("\\\\", "\\")
+
     def info_path(self):
         self._set_panel()
         self._set_mode()
@@ -468,7 +471,7 @@ class InfoPanel(BaseShowPanel):
 
     def _set_path(self):
         valid_len = self.winwidth - len(self.nr) - len(self.sz) - len(self.keep) - len(self.mode)
-        path_str = '' if self._empty() else " {} ".format(str(self.path))
+        path_str = '' if self._empty() else " {} ".format(self._escape_path(self.path))
         if dplen(path_str) > valid_len:
             path_str = path_str[:valid_len - 4] + '... '
         blank = valid_len - dplen(path_str)
