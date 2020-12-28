@@ -23,16 +23,17 @@ function! lf#start(cwd) abort
 endfunction
 
 let s:name_dict = {
-      \ '': 'name',
+      \ '': 'main',
       \ 'cli_panel': 'cli',
       \ 'msg_panel': 'msg',
+      \ 'search_panel': 'search',
       \ }
 
 function! s:action(runner, default_action) abort
   redraw
   let nr = getchar()
   let ch = type(nr) ? nr : nr2char(nr)
-  let name = a:runner == '' ? 'main' : s:name_dict[a:runner]
+  let name = s:name_dict[a:runner]
   exec printf("let action = get(g:vlf_mapping_%s, ch, '%s')", name, a:default_action)
   let member = a:runner == '' ? '' : a:runner.'.'
   if a:runner == ''
@@ -50,6 +51,10 @@ endfunction
 
 function! lf#cli() abort
   return s:action('cli_panel', 'add')
+endfunction
+
+function! lf#search() abort
+  return s:action('search_panel', 'add')
 endfunction
 
 function! lf#msg() abort

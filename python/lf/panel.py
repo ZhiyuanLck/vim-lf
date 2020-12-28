@@ -5,6 +5,7 @@ from .utils import vimeval, vimcmd
 from .utils import setlocal, winexec, dplen, bytelen
 from .text import Text, SimpleLine
 from .option import lfopt, Option
+from .search import RegexSearch
 
 
 logger = logging.getLogger()
@@ -222,22 +223,31 @@ class DirPanel(Panel):
     def curpath(self):
         return None if self.empty() else self.text[self.index].path
 
-    def refresh(self, keep_pos=True, item=None):
-        if item is not None:
+    def refresh(self, keep_pos=True, item=None, index=None):
+        if index is not None:
+            self._glob()
+            self.index = index
+            self._correct_index()
+        elif item is not None:
             self._glob()
             self._index(item)
-            self._cursorline()
         elif keep_pos:
             item = self.curpath()
             self._glob()
             self._index(item)
-            self._cursorline()
         else:
             self._glob()
             self._correct_index()
-            self._cursorline()
+        self._cursorline()
         if self.is_middle:
             logger.info("cursor pos after refresh: {}".format(self.index))
+
+    def search_refresh(self, Text):
+        self.text = Text.text
+        self.index = 0
+        props = [' ' * self.winwidth] if self.empty() else Text.props
+        vimcmd("call popup_settext({}, {})".format(self.winid, props))
+        self._cursorline()
 
     def backward(self):
         if self.cwd == self.cwd.parent:
@@ -467,7 +477,7 @@ class InfoPanel(BaseShowPanel):
         self.path_str_fill = path_str + blank * ' '
 
 
-def update(fun):
+def update_cursor(fun):
     def wrapper(*args, **kwargs):
         fun(*args, **kwargs)
         self = args[0]
@@ -488,6 +498,7 @@ class CliPanel(BaseShowPanel):
         prompt_len = bytelen(self.prompt)
         cmd_len = bytelen(self.cmd[:self.pos])
         opt = {"text": text}
+        logger.info('cmd is "{}"'.format(self.cmd))
         prop_prompt = {
                 "col": 1,
                 "length": prompt_len,
@@ -526,41 +537,41 @@ class CliPanel(BaseShowPanel):
             return 1
         return bytelen(self.cmd[self.pos])
 
-    @update
+    @update_cursor
     def clear(self):
         self.cmd = ''
         self.pos = 0
 
-    @update
+    @update_cursor
     def add(self):
         char = vimeval("ch")
         self.cmd = self._head() + char + self._tail()
         self.pos += 1
 
-    @update
+    @update_cursor
     def delete(self):
         if self._empty():
             return
         self.cmd = self.cmd[:self.pos - 1] + self._tail()
         self.pos -= 1
 
-    @update
+    @update_cursor
     def left(self):
         if self._empty():
             return
         self.pos -= 1
 
-    @update
+    @update_cursor
     def right(self):
         if self._at_end():
             return
         self.pos += 1
 
-    @update
+    @update_cursor
     def go_start(self):
         self.pos = 0
 
-    @update
+    @update_cursor
     def go_end(self):
         self.pos = len(self.cmd)
 
@@ -571,6 +582,39 @@ class CliPanel(BaseShowPanel):
     def quit(self):
         self.close()
         self.do = False
+
+
+class RegexSearchPanel(CliPanel):
+    def __init__(self, manager):
+        super().__init__('/')
+        self.manager = manager
+        self.middle = manager.middle_panel
+        self.save_index = self.middle.index
+        self.regex_search = RegexSearch(self.middle.text, self)
+
+    def _refresh(self):
+        T, pos_list = self.regex_search.filter()
+        self.middle.search_refresh(T)
+
+    def restore(self):
+        self.middle.refresh(index=self.save_index)
+
+    def input(self):
+        while 1:
+            action = vimeval("lf#search()")
+            if action in ['done', 'quit']:
+                break
+
+    def quit(self):
+        super().quit()
+        self.restore()
+
+    def done(self):
+        super().done()
+
+    def add(self):
+        super().add()
+        self._refresh()
 
 
 class MsgRemovePanel(BaseShowPanel):

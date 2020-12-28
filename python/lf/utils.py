@@ -2,6 +2,7 @@ import vim
 
 from functools import partial
 from pathlib import Path
+from copy import copy
 
 vimcmd = vim.command
 
@@ -41,10 +42,12 @@ def winexec(winid, cmd):
 
 
 def dplen(text):
+    text = copy(text).replace("\\", "\\\\")
     return vimeval('strdisplaywidth("{}")'.format(text), 1)
 
 
 def bytelen(text):
+    text = copy(text).replace("\\", "\\\\")
     return vimeval('len("{}")'.format(text), 1)
 
 

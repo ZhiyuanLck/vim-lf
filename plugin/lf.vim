@@ -28,6 +28,7 @@ call s:init_var("mode_keep_open", "KEEP")
 let g:vlf_mapping_main = {}
 let g:vlf_mapping_cli = {}
 let g:vlf_mapping_msg = {}
+let g:vlf_mapping_search = {}
 
 function! s:init_single_action(type, action, key)
   call s:init_var("action_".a:type.'_'.a:action, a:key)
@@ -50,6 +51,11 @@ endfunction
 
 function! s:init_action_cli(action, key) abort
   call s:init_action("cli", a:action, a:key)
+  call s:init_action("search", a:action, a:key)
+endfunction
+
+function! s:init_action_search(action, key) abort
+  call s:init_action("search", a:action, a:key)
 endfunction
 
 function! s:init_action_msg(action, key) abort
@@ -83,6 +89,7 @@ call s:init_action_main("select_all", "V")
 call s:init_action_main("normal", "\<esc>")
 call s:init_action_main("change_active", "o")
 call s:init_action_main("resize", "R")
+call s:init_action_main("regex_search", "/")
 
 call s:init_action_cli("done", "\<cr>")
 call s:init_action_cli("delete", ["\<bs>"])

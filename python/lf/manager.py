@@ -3,8 +3,7 @@ import shutil
 from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
-from .panel import DirPanel, FilePanel, InfoPanel, BorderPanel, CliPanel
-from .panel import MsgRemovePanel
+from .panel import *
 from .option import lfopt, Option
 
 
@@ -101,7 +100,7 @@ class Manager(object):
         logger.info("initialize cursor pos as {}".format(self.middle_panel.index))
 
     def resize(self):
-        panels = ["border", "left", "middle", "right", "info", "cli", "msg"]
+        panels = ["border", "left", "middle", "right", "info", "cli", "msg", "search"]
         for panel in panels:
             try:
                 getattr(self, panel + "_panel").resize(panel)
@@ -356,6 +355,12 @@ class Manager(object):
 
     def open_tab(self):
         self._open("tabedit")
+
+    def regex_search(self):
+        if self._is_select():
+            return
+        self.search_panel = RegexSearchPanel(self)
+        self.search_panel.input()
 
     def quit(self):
         self._close()
