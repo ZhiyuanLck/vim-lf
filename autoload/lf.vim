@@ -72,3 +72,9 @@ endfunction
 function! lf#resize() abort
   exec g:vlf_py "vlf_manager.resize()"
 endfunction
+
+function! lf#restore_pos() abort
+  if line("'\"") > 0 && line("'\"") <= line("$") && g:vlf_restore_pos == 1
+    exec "norm! g`\""
+  endif
+endfunction

@@ -280,6 +280,9 @@ class Manager(object):
     def copy(self):
         pass
 
+    def _restore_pos(self):
+        vimcmd("call lf#restore_pos()")
+
     @update_all
     def touch(self):
         if self._is_select():
@@ -325,6 +328,7 @@ class Manager(object):
             logger.info("open file {}".format(path))
             is_open = True
             vimcmd("{} {}".format(cmd, self._escape_path(path)))
+            self._restore_pos()
         if self.is_keep_open:
             self._restore()
             if lfopt.auto_keep_open:
