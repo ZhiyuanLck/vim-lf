@@ -92,6 +92,7 @@ call s:init_action_main("normal", "\<esc>")
 call s:init_action_main("change_active", "o")
 call s:init_action_main("resize", "R")
 call s:init_action_main("regex_search", "/")
+call s:init_action_main("regex_search_all", "?")
 
 call s:init_action_cli("done", "\<cr>")
 call s:init_action_cli("delete", ["\<bs>"])

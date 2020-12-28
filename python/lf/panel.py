@@ -168,6 +168,12 @@ class DirPanel(Panel):
         self.path_list = self.cwd.glob('*')
         self._set_text()
 
+    def glob_all(self):
+        self.index = 0
+        self.path_list = self.cwd.rglob('*')
+        self._set_text()
+        self._cursorline()
+
     def _set_text(self):
         T = Text(self)
         self.text = T.text

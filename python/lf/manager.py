@@ -207,42 +207,42 @@ class Manager(object):
     def down(self):
         if self._is_select():
             self.v_block.down()
-        elif self._is_normal():
+        else:
             self.middle_panel.move(down=True)
 
     @update_all
     def up(self):
         if self._is_select():
             self.v_block.up()
-        elif self._is_normal():
+        else:
             self.middle_panel.move(down=False)
 
     @update_all
     def top(self):
         if self._is_select():
             self.v_block.top()
-        elif self._is_normal():
+        else:
             self.middle_panel.jump(top=True)
 
     @update_all
     def bottom(self):
         if self._is_select():
             self.v_block.bottom()
-        elif self._is_normal():
+        else:
             self.middle_panel.jump(top=False)
 
     @update_all
     def scrollup(self):
         if self._is_select():
             self.v_block.scroll_up()
-        elif self._is_normal():
+        else:
             self.middle_panel.scroll(down=False)
 
     @update_all
     def scrolldown(self):
         if self._is_select():
             self.v_block.scroll_down()
-        elif self._is_normal():
+        else:
             self.middle_panel.scroll(down=True)
 
     @update_all
@@ -390,6 +390,10 @@ class Manager(object):
             self.normal()
         self.search_panel = RegexSearchPanel(self)
         self.search_panel.input()
+
+    def regex_search_all(self):
+        self.middle_panel.glob_all()
+        self.regex_search()
 
     def quit(self):
         self._close()
