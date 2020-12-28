@@ -16,22 +16,21 @@ class RegexSearch(object):
     def filter(self):
         path_list = []
         pos_list = []
-        logger.info("try to match pattern {}".format(self._pattern()))
-        for line in self.text:
-            raw_text = line.raw_text
-            col, length = self._match(raw_text)
-            if col != -1:
-                path_list.append(line.path)
-                pos_list.append((col, length))
+        logger.info('try to match pattern "{}"'.format(self._pattern()))
+        try:
+            for line in self.text:
+                raw_text = line.raw_text
+                col, length = self._match(raw_text)
+                if col != -1:
+                    path_list.append(line.path)
+                    pos_list.append((col, length))
+        except vim.error as e:
+            logger.warning(e)
         self.middle_panel.path_list = path_list
         return Text(self.middle_panel), pos_list
 
     def _match(self, path):
-        try:
-            result = vimeval('matchstrpos("{}", "{}")'.format(path, self._pattern()))
-        except vim.error as e:
-            result = ['', -1, -1]
-            logger.warning(e)
+        result = vimeval("matchstrpos('{}', '{}')".format(path, self._pattern()))
         start = int(result[1])
         end = int(result[2])
         length = end - start + 1

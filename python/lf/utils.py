@@ -50,6 +50,11 @@ def bytelen(text):
     text = copy(text).replace("\\", "\\\\")
     return vimeval('len("{}")'.format(text), 1)
 
+def vimstr(l):
+    if isinstance(l, str):
+        return l
+    return str(l).replace('\\\\', '\\')
+
 
 def get_cwd():
     cwd = vimeval("fnamemodify(resolve(expand('%:p')), ':p:h')")

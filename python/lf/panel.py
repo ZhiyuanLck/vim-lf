@@ -1,8 +1,7 @@
 import logging
 from copy import copy
 from operator import attrgetter
-from .utils import vimeval, vimcmd
-from .utils import setlocal, winexec, dplen, bytelen
+from .utils import *
 from .text import Text, SimpleLine
 from .option import lfopt, Option
 from .search import RegexSearch
@@ -173,7 +172,7 @@ class DirPanel(Panel):
         T = Text(self)
         self.text = T.text
         props = [' ' * self.winwidth] if self.empty() else T.props
-        vimcmd("call popup_settext({}, {})".format(self.winid, props))
+        vimcmd("call popup_settext({}, {})".format(self.winid, vimstr(props)))
 
     def _cursorline(self):
         """
@@ -357,7 +356,7 @@ class BaseShowPanel(Panel):
         super().__init__(name, has_prop)
 
     def _settext(self, text):
-        vimcmd("call popup_settext({}, {})".format(self.winid, text))
+        vimcmd("call popup_settext({}, {})".format(self.winid, vimstr(text)))
 
     def clear(self):
         self._settext([])

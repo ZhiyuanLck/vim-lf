@@ -66,7 +66,7 @@ class Manager(object):
         logger.info("init cwd as {}".format(self.cwd))
 
     def _escape_path(self, path):
-        path_str = str(path.resolve()).replace(' ', '\\ ')
+        path_str = str(path.resolve()).replace('\\', '\\\\').replace(' ', '\\ ')
         logger.info("final path string is {}".format(path_str))
         return path_str
 
