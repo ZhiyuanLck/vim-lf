@@ -75,7 +75,7 @@ class Manager(object):
                 logger.info("delete log before today")
 
     def start(self, cwd):
-        logger.info("start manager")
+        logger.info("START manager")
         self.is_quit = False
         self.is_cfile = False
         self.is_keep_open = False
@@ -428,6 +428,7 @@ class Manager(object):
         self.is_quit = True
         vimcmd("set laststatus={}".format(lfopt.laststatus))
         vimcmd("set t_ve={}".format(lfopt.t_ve))
+        logger.info("QUIT")
 
     @update_info
     def change_keep_open(self):

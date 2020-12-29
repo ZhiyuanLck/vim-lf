@@ -36,7 +36,7 @@ class FixedOption(object):
         self.log_dir = self.cache_path / 'log'
         self._mkdir(self.log_dir)
         today = date.today()
-        self.log_path = self.cache_path / "{}-{}-{}.log".format(today.year, today.month, today.day)
+        self.log_path = self.log_dir / "{}-{}-{}.log".format(today.year, today.month, today.day)
 
     def _get_path(self, path):
         return Path(path).expanduser().resolve()
