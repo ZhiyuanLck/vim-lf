@@ -613,6 +613,7 @@ class RegexSearchPanel(CliPanel):
         self.middle = manager.middle_panel
         self.save_index = self.middle.index
         self.regex_search = RegexSearch(self.middle.text, self)
+        self.history_idx = -1
 
     def _refresh(self):
         T, pos_list = self.regex_search.filter()
@@ -635,9 +636,11 @@ class RegexSearchPanel(CliPanel):
     def clear(self):
         super().clear()
         self.restore()
+        self.history_idx = -1
 
     def done(self):
         super().done()
+        self.manager.save_regex(self.cmd)
         self.manager.mode = "filter"
         self.manager.info_panel.info_path()
         self.middle._cursorline()
@@ -645,10 +648,42 @@ class RegexSearchPanel(CliPanel):
     def add(self):
         super().add()
         self._refresh()
+        self.history_idx = -1
 
     def delete(self):
         super().delete()
-        self._refresh()
+        if self.cmd == '':
+            self.restore()
+        else:
+            self._refresh()
+        self.history_idx = -1
+
+    def previous_search(self):
+        logger.info("current history index is {}".format(self.history_idx))
+        if self.history_idx == -1:
+            self.save_cmd = copy(self.cmd)
+        if self.history_idx >= len(self.manager.regex_search_history) - 1:
+            return
+        self.history_idx += 1
+        self.cmd = self.manager.regex_search_history[self.history_idx]
+        self.go_end()
+        self.restore()
+        if self.cmd != '':
+            self._refresh()
+
+    def next_search(self):
+        logger.info("current history index is {}".format(self.history_idx))
+        if self.history_idx < 0:
+            return
+        self.history_idx -= 1
+        if self.history_idx == -1:
+            self.cmd = copy(self.save_cmd)
+        else:
+            self.cmd = self.manager.regex_search_history[self.history_idx]
+        self.go_end()
+        self.restore()
+        if self.cmd != '':
+            self._refresh()
 
 
 class MsgRemovePanel(BaseShowPanel):

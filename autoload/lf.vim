@@ -65,10 +65,6 @@ function! lf#check_log() abort
   exec g:vlf_py "vlf_manager.check_log()"
 endfunction
 
-function! lf#reset_log() abort
-  exec g:vlf_py "vlf_manager.reset_log()"
-endfunction
-
 function! lf#resize() abort
   exec g:vlf_py "vlf_manager.resize()"
 endfunction
@@ -77,4 +73,14 @@ function! lf#restore_pos() abort
   if line("'\"") > 0 && line("'\"") <= line("$") && g:vlf_restore_pos == 1
     exec "norm! g`\""
   endif
+endfunction
+
+function! lf#clear_log() abort
+  exec g:vlf_py "vlf_manager.clear_log()"
+endfunction
+
+function! lf#leave() abort
+  exec g:vlf_py "logger.info('running code before quit')"
+  exec g:vlf_py "vlf_manager.reset_log()"
+  exec g:vlf_py "vlf_manager.dump()"
 endfunction

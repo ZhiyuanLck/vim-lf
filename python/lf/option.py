@@ -1,5 +1,6 @@
 from copy import copy
 from pathlib import Path
+from datetime import date
 from .utils import vimget, vimeval
 
 
@@ -19,13 +20,23 @@ class FixedOption(object):
         self.mode_select = vimget('mode_select', "'SELECT'")
         self.mode_filter = vimget('mode_filter', "'FILTER'")
         self.mode_keep_open = vimget('mode_keep_open', "'KEEP'")
+        self.max_regex_search_history = vimget('max_regex_search_history', 50, 1)
         self._set_path()
 
     def _set_path(self):
         cache_path = vimget("cache_path", "'~/.vim/cache/vim-lf'")
         self.cache_path = self._get_path(cache_path)
         self._mkdir(self.cache_path)
-        self.log_path = self.cache_path / 'vim-lf.log'
+        self._set_log()
+        self.history_path = self.cache_path / 'history'
+        self._mkdir(self.history_path)
+        self.regex_search_history = self.history_path / 'regex_search_history.p'
+
+    def _set_log(self):
+        self.log_dir = self.cache_path / 'log'
+        self._mkdir(self.log_dir)
+        today = date.today()
+        self.log_path = self.cache_path / "{}-{}-{}.log".format(today.year, today.month, today.day)
 
     def _get_path(self, path):
         return Path(path).expanduser().resolve()

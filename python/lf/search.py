@@ -18,7 +18,7 @@ class RegexSearch(object):
         pos_list = []
         logger.info('try to match pattern "{}"'.format(self._pattern()))
         try:
-            for line in self.text:
+            for line in self.middle_panel.text:
                 raw_text = line.raw_text
                 col, length, is_match = self._match(raw_text)
                 if is_match:
@@ -31,7 +31,6 @@ class RegexSearch(object):
 
     def _match(self, path):
         result = vimeval("matchstrpos('{}', '{}')".format(path, self._pattern()))
-        logger.info("match result is '{}'".format(result[0]))
         string = result[0]
         start = int(result[1])
         before = path[:start]

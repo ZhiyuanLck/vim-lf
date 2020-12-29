@@ -75,6 +75,15 @@ action     | key
 `go_end`   | `"\<c-e>"`
 `quit`     | `"\<quit>"`
 
+## Search action
+
+When you are in `search` mode, all cli actions are supported and there are some extra actions.
+
+action            | key
+------            | ---
+`previous_search` | `["\<c-k>", "\<up>"]`
+`next_search`     | `["\<c-j>", "\<down>"]`
+
 ## Features to be supported
 - file operation
   - copy, move, paste
@@ -83,6 +92,7 @@ action     | key
   - filter directory
   - filter file
   - filter file with the same extension
+- search completion
 - MRU directory/file
 - Open manager through file under cursor
 - zip file and tar file

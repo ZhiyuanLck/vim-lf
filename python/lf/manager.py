@@ -1,6 +1,8 @@
 import logging
 import shutil
+import pickle
 import vim
+from collections import deque
 from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
@@ -37,14 +39,40 @@ update_info = partial(_update, ignore=True)
 
 class Manager(object):
     def __init__(self):
+        logger.info("INIT manager")
         vimcmd("call lf#colorscheme#highlight()")
+        if lfopt.regex_search_history.exists():
+            with open(lfopt.regex_search_history, 'rb') as f:
+                self.regex_search_history = pickle.load(f)
+                logger.info("load regex search history")
+        else:
+            self.regex_search_history = deque(maxlen=lfopt.max_regex_search_history)
+            logger.info("no regex search history, init as []")
+
+    def save_regex(self, pattern):
+        self.regex_search_history.appendleft(pattern)
+
+    def dump(self):
+        try:
+            with open(lfopt.regex_search_history, 'wb') as f:
+                pickle.dump(self.regex_search_history, f)
+                logger.info("dump {} regex search history".format(len(self.regex_search_history)))
+        except Exception as e:
+            logger.error(e)
 
     def check_log(self):
         vimcmd("vert botright split {}".format(self._escape_path(lfopt.log_path)))
+        vimcmd("norm! G")
 
-    def reset_log(self):
+    def clear_log(self):
         if lfopt.log_path.exists():
             lfopt.log_path.unlink()
+
+    def reset_log(self):
+        for path in lfopt.log_dir.glob("*.log"):
+            if path != lfopt.log_path:
+                path.unlink()
+                logger.info("delete log before today")
 
     def start(self, cwd):
         logger.info("start manager")
