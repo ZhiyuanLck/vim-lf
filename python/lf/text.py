@@ -1,5 +1,6 @@
 from operator import attrgetter
 from .utils import vimeval, dplen, bytelen
+from .option import lfopt
 
 
 class BaseLine(object):
@@ -79,7 +80,6 @@ class Line(BaseLine):
 
 class Text(object):
     def __init__(self, panel):
-        self.lfopt = panel.lfopt
         self.panel = panel
         self.text = []
         for p in panel.path_list:
@@ -88,9 +88,9 @@ class Text(object):
                 continue
             self.text.append(line)
         key = []
-        if self.lfopt.sort_dir_first:
+        if lfopt.sort_dir_first:
             key.append('sort_dir_first')
-        if self.lfopt.sort_ignorecase:
+        if lfopt.sort_ignorecase:
             key.append('lower_text')
         if key == []:
             self.text = sorted(self.text)

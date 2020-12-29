@@ -5,7 +5,7 @@ from pathlib import Path
 from functools import partial, wraps
 from .utils import vimeval, vimcmd, resetg
 from .panel import *
-from .option import lfopt, Option
+from .option import lfopt, PopupOption
 
 
 logger = logging.getLogger()

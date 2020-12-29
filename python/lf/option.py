@@ -3,6 +3,38 @@ from pathlib import Path
 from .utils import vimget, vimeval
 
 
+class FixedOption(object):
+    def __init__(self):
+        self.laststatus = vimeval('&laststatus')
+        self.t_ve = vimeval('&t_ve')
+        self.show_hidden = vimget("show_hidden", 0) == '1'
+        self.max_file_size = vimget('max_size', 1, 1) * 1048576
+        self.auto_edit = vimget('auto_edit', 0) == '1'
+        self.auto_edit_cmd = vimget('auto_edit_cmd', "'edit'")
+        self.sort_dir_first = vimget('sort_dir_first', 1) == '1'
+        self.sort_ignorecase = vimget('sort_ignorecase', 1) == '1'
+        self.file_numbered = vimget('file_numbered', 0) == '1'
+        self.auto_keep_open = vimget('auto_keep_open', 0) == '1'
+        self.mode_normal = vimget('mode_normal', "'NORMAL'")
+        self.mode_select = vimget('mode_select', "'SELECT'")
+        self.mode_filter = vimget('mode_filter', "'FILTER'")
+        self.mode_keep_open = vimget('mode_keep_open', "'KEEP'")
+        self._set_path()
+
+    def _set_path(self):
+        cache_path = vimget("cache_path", "'~/.vim/cache/vim-lf'")
+        self.cache_path = self._get_path(cache_path)
+        self._mkdir(self.cache_path)
+        self.log_path = self.cache_path / 'vim-lf.log'
+
+    def _get_path(self, path):
+        return Path(path).expanduser().resolve()
+
+    def _mkdir(self, path):
+        if not path.exists():
+            path.mkdir(parents=True)
+
+
 class Popup(object):
     def __init__(self, width, height, col, line, padding, zindex=10, border=False):
         self.opt = {
@@ -60,44 +92,10 @@ class Popup(object):
         self.opt["borderhighlight"] = ["vlf_hl_border"]
 
 
-class Option(object):
+class PopupOption(object):
     def __init__(self):
-        self._variables()
-        self._popup()
-
-    def _variables(self):
-        self.laststatus = vimeval('&laststatus')
-        self.t_ve = vimeval('&t_ve')
         self.lines = vimeval('&lines', 1)
         self.columns = vimeval('&columns', 1)
-        self.show_hidden = vimget("show_hidden", 0) == '1'
-        self.max_file_size = vimget('max_size', 1, 1) * 1048576
-        self.auto_edit = vimget('auto_edit', 0) == '1'
-        self.auto_edit_cmd = vimget('auto_edit_cmd', "'edit'")
-        self.sort_dir_first = vimget('sort_dir_first', 1) == '1'
-        self.sort_ignorecase = vimget('sort_ignorecase', 1) == '1'
-        self.file_numbered = vimget('file_numbered', 0) == '1'
-        self.auto_keep_open = vimget('auto_keep_open', 0) == '1'
-        self.mode_normal = vimget('mode_normal', "'NORMAL'")
-        self.mode_select = vimget('mode_select', "'SELECT'")
-        self.mode_filter = vimget('mode_filter', "'FILTER'")
-        self.mode_keep_open = vimget('mode_keep_open', "'KEEP'")
-        self._set_path()
-
-    def _set_path(self):
-        cache_path = vimget("cache_path", "'~/.vim/cache/vim-lf'")
-        self.cache_path = self._get_path(cache_path)
-        self._mkdir(self.cache_path)
-        self.log_path = self.cache_path / 'vim-lf.log'
-
-    def _get_path(self, path):
-        return Path(path).expanduser().resolve()
-
-    def _mkdir(self, path):
-        if not path.exists():
-            path.mkdir(parents=True)
-
-    def _popup(self):
         self.width = vimget('width', 0.8, 2)
         self.height = vimget('height', 0.8, 2)
         panel_width = vimget('panel_width', [0.25, 0.25])
@@ -216,4 +214,4 @@ class Option(object):
                 )
 
 
-lfopt = Option()
+lfopt = FixedOption()
