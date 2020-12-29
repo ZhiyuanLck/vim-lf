@@ -185,7 +185,7 @@ class DirPanel(Panel):
         highlight curcorline
         """
         if self.cursorline_id is not None:
-            vimcmd("call clearmatches({})".format(self.winid))
+            self._match_clear()
             self.cursorline_id = None
         if self.empty() and self.is_middle:
             self.cursorline_id = vimeval(
@@ -196,6 +196,9 @@ class DirPanel(Panel):
                 "matchaddpos('vlf_hl_cursorline_%d', [%s], 100, -1, #{window: %s})"
                 % (self.number, self.index + 1, self.winid))
         vimcmd('call win_execute({}, "norm! {}zz", 1)'.format(self.winid, self.index + 1))
+
+    def _match_clear(self):
+        vimcmd("call clearmatches({})".format(self.winid))
 
     def select(self):
         if self.empty():
@@ -247,12 +250,18 @@ class DirPanel(Panel):
         if self.is_middle:
             logger.info("cursor pos after refresh: {}".format(self.index))
 
-    def search_refresh(self, Text):
+    def search_refresh(self, Text, pos_list):
         self.text = Text.text
         self.index = 0
         props = [' ' * self.winwidth] if self.empty() else Text.props
         vimcmd("call popup_settext({}, {})".format(self.winid, props))
-        self._cursorline()
+        self._match_clear()
+        pos = 0
+        for col, length in pos_list:
+            pos += 1
+            vimcmd(
+                    "call matchaddpos('vlf_hl_search', [%s], 200, -1, #{window: %s})"
+                    % ([pos, col, length], self.winid))
 
     def backward(self):
         if self.cwd == self.cwd.parent:
@@ -607,7 +616,7 @@ class RegexSearchPanel(CliPanel):
 
     def _refresh(self):
         T, pos_list = self.regex_search.filter()
-        self.middle.search_refresh(T)
+        self.middle.search_refresh(T, pos_list)
         self.manager._change_right()
 
     def restore(self):
@@ -631,6 +640,7 @@ class RegexSearchPanel(CliPanel):
         super().done()
         self.manager.mode = "filter"
         self.manager.info_panel.info_path()
+        self.middle._cursorline()
 
     def add(self):
         super().add()

@@ -36,6 +36,10 @@ let s:default_highlights = {
       \ "vlf_hl_cursorline_v": #{
       \   ctermbg : "12",
       \   },
+      \ "vlf_hl_search": #{
+      \   ctermfg : "46",
+      \   cterm: "bold",
+      \   },
       \ "vlf_hl_border": #{
       \   ctermfg : "48",
       \   guifg : "#343d46",

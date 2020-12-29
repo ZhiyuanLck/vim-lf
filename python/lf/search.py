@@ -1,6 +1,6 @@
 import logging, vim
 from .text import Text
-from .utils import vimeval
+from .utils import vimeval, bytelen
 
 logger = logging.getLogger()
 
@@ -20,8 +20,8 @@ class RegexSearch(object):
         try:
             for line in self.text:
                 raw_text = line.raw_text
-                col, length = self._match(raw_text)
-                if col != -1:
+                col, length, is_match = self._match(raw_text)
+                if is_match:
                     path_list.append(line.path)
                     pos_list.append((col, length))
         except vim.error as e:
@@ -31,7 +31,8 @@ class RegexSearch(object):
 
     def _match(self, path):
         result = vimeval("matchstrpos('{}', '{}')".format(path, self._pattern()))
+        logger.info("match result is '{}'".format(result[0]))
+        string = result[0]
         start = int(result[1])
-        end = int(result[2])
-        length = end - start + 1
-        return start, length
+        before = path[:start]
+        return bytelen(before) + 1, bytelen(string), start != -1
