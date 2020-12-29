@@ -80,7 +80,8 @@ function! lf#clear_log() abort
 endfunction
 
 function! lf#leave() abort
-  exec g:vlf_py "logger.info('running code before quit')"
+  exec g:vlf_py "logger.info('running code before leaving vim')"
   exec g:vlf_py "vlf_manager.reset_log()"
   exec g:vlf_py "vlf_manager.dump()"
+  exec g:vlf_py "logger.info('LEAVE')"
 endfunction

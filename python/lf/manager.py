@@ -428,7 +428,7 @@ class Manager(object):
         self.is_quit = True
         vimcmd("set laststatus={}".format(lfopt.laststatus))
         vimcmd("set t_ve={}".format(lfopt.t_ve))
-        logger.info("QUIT")
+        logger.info("QUIT manager")
 
     @update_info
     def change_keep_open(self):
