@@ -79,6 +79,7 @@ class Manager(object):
         self.is_quit = False
         self.is_cfile = False
         self.is_keep_open = False
+        self.filter_select = False
         self.mode = "normal"
         self._resolve(cwd)
         vimcmd("set laststatus=0")
@@ -101,13 +102,13 @@ class Manager(object):
         return path_str
 
     def _is_normal(self):
-        if not self._is_filter():
-            self._set_mode()
+        #  if not self._is_filter():
+            #  self._set_mode()
         return self.mode == "normal"
 
     def _is_select(self):
-        if not self._is_filter():
-            self._set_mode()
+        #  if not self._is_filter():
+            #  self._set_mode()
         return self.mode == "select"
 
     def _is_filter(self):
@@ -175,16 +176,27 @@ class Manager(object):
 
     @update_info
     def normal(self):
-        logger.info("current mode is {}, now try to back to normal mode".format(self.mode))
         if self.is_quit: # if quit manager, no need to change mode
             return
         if self._is_select():
+            logger.info("quit select mode")
             self.v_block.quit()
         elif self._is_filter():
-            self.search_panel.restore()
+            logger.info("quit filter mode")
+            try:
+                self.search_panel.restore()
+            except AttributeError:
+                self.middle_panel.refresh(item=self._curpath())
             self._change_right()
-        self.mode = "normal"
+            self.mode = "normal"
+        if self._is_select():
+            if self.filter_select:
+                logger.info("back to filter mode")
+                self.mode = "filter"
+            else:
+                self.mode = "normal"
         self.middle_panel._cursorline()
+        self.filter_select = False
         if lfopt.auto_keep_open:
             self.is_keep_open = False
 
@@ -193,6 +205,10 @@ class Manager(object):
         if self.empty():
             logger.info("empty directory, action cancels")
             return
+        if self._is_filter():
+            self.filter_select = True
+            logger.info("remember filter mode")
+        self.mode = "select"
         self.middle_panel.select()
         self.v_block = self.middle_panel.v_block
 
@@ -357,8 +373,7 @@ class Manager(object):
         path = self.middle_panel.cwd.resolve(True) / self.cli_panel.cmd
         logger.info("edit file {}".format(path))
         if self.is_keep_open:
-            self.right_panel.set_exist()
-            self._close()
+            self._save_middle()
         else:
             self.quit()
         vimcmd("edit {}".format(self._escape_path(path)))
@@ -367,11 +382,15 @@ class Manager(object):
             self.is_keep_open = False
         self.normal()
 
+    def _save_middle(self):
+        self.right_panel.set_exist()
+        self._close()
+        self._middle_backup = [self.middle_panel.index, self.middle_panel.text]
+
     def _open(self, cmd):
         logger.info("START opening with command `{}`".format(cmd))
         if self.is_keep_open:
-            self.right_panel.set_exist()
-            self._close()
+            self._save_middle()
         is_open = False # whether the file is opened
         for path in self._get_path_list():
             if not path.is_file():
@@ -426,6 +445,24 @@ class Manager(object):
         self.middle_panel.glob_all()
         self.regex_search()
 
+    def _filter(self, mode):
+        if self._is_select():
+            self.normal()
+        self.mode = "filter"
+        getattr(self.middle_panel, "filter_{}".format(mode))()
+
+    @update_info
+    def filter_dir(self):
+        self._filter("dir")
+
+    @update_info
+    def filter_file(self):
+        self._filter("file")
+
+    @update_info
+    def filter_ext(self):
+        self._filter("ext")
+
     def quit(self):
         self._close()
         self.is_quit = True
@@ -454,7 +491,7 @@ class Manager(object):
         self.left_panel._create_popup()
         self.left_panel.refresh()
         self.middle_panel._create_popup()
-        self.middle_panel.refresh()
+        self.middle_panel.restore(self._middle_backup)
         self._change_right(True)
         self.info_panel = InfoPanel(self)
 

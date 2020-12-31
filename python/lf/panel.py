@@ -61,7 +61,7 @@ class Select(object):
 
     def _update(self):
         self.panel.index = self.end
-        self.panel.refresh(keep_pos=False)
+        #  self.panel.refresh(keep_pos=False)
         self._match_clear()
         for index in self._range():
             vimcmd(
@@ -77,7 +77,7 @@ class Select(object):
 
     def quit(self, interrupt=False):
         self._match_clear()
-        self.panel.mode = "normal"
+        #  self.panel.mode = "normal"
         #  if not interrupt:
             #  self.panel.index = self.start if self.start < self.end else self.end
             #  self.panel.refresh(keep_pos=False)
@@ -161,6 +161,12 @@ class DirPanel(Panel):
     def _is_select(self):
         return self.mode == "select"
 
+    def restore(self, backup):
+        self.index, self.text = backup
+        self.path_list = self.get_path_list()
+        self._set_text()
+        self._cursorline()
+
     def get_path_list(self):
         return [line.path for line in self.text]
 
@@ -174,8 +180,9 @@ class DirPanel(Panel):
         self._set_text()
         self._cursorline()
 
-    def _set_text(self):
-        T = Text(self)
+    def _set_text(self, T=None):
+        if T is None:
+            T = Text(self)
         self.text = T.text
         props = [' ' * self.winwidth] if self.empty() else T.props
         vimcmd("call popup_settext({}, {})".format(self.winid, vimstr(props)))
@@ -204,7 +211,7 @@ class DirPanel(Panel):
         if self.empty():
             return
         self.v_block = Select(self)
-        self.mode = 'select'
+        #  self.mode = 'select'
 
     def _correct_index(self):
         """
@@ -265,6 +272,37 @@ class DirPanel(Panel):
             vimcmd(
                     "call matchaddpos('vlf_hl_search', [%s], 200, -1, #{window: %s})"
                     % ([pos, col, length], self.winid))
+
+    def filter_dir(self):
+        curpath = self.curpath()
+        if curpath is None or not curpath.is_dir():
+            return
+        self.path_list = [line.path for line in self.text if line.path.is_dir()]
+        T = Text(self)
+        self._set_text(T)
+        self._index(item=curpath)
+        self._cursorline()
+
+    def filter_file(self):
+        curpath = self.curpath()
+        if curpath is None or not curpath.is_file():
+            return
+        self.path_list = [line.path for line in self.text if line.path.is_file()]
+        T = Text(self)
+        self._set_text(T)
+        self._index(item=curpath)
+        self._cursorline()
+
+    def filter_ext(self):
+        curpath = self.curpath()
+        if curpath is None or not curpath.is_file():
+            return
+        ext = curpath.suffix
+        self.path_list = [line.path for line in self.text if line.path.suffix == ext]
+        T = Text(self)
+        self._set_text(T)
+        self._index(item=curpath)
+        self._cursorline()
 
     def backward(self):
         if self.cwd == self.cwd.parent:
