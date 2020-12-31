@@ -331,6 +331,12 @@ class DirPanel(Panel):
         self.refresh()
 
 
+class HistoryPanel(Panel):
+    def __init__(self, history):
+        self.history = history
+        self.pos = -1
+
+
 class FilePanel(Panel):
     def __init__(self, path):
         self.ppopt = PopupOption()

@@ -148,12 +148,15 @@ class Manager(object):
         return self.middle_panel.empty()
 
     def _get_path_list(self, is_all=False):
+        logger.info("try to get selected path_list")
         if is_all:
+            logger.info("get all paths in panel")
             return self.middle_panel.get_path_list()
         if self._is_select():
             path_list = self.v_block.selection()
-        elif self._is_normal():
+        else:
             path_list = [self._curpath()]
+        logger.info("get path_list of length {}".format(len(path_list)))
         return path_list
 
     def _action(self):
