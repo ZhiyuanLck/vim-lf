@@ -7,11 +7,14 @@ class BaseLine(object):
     def __init__(self, path):
         self.path = path
         self.text = ''
-        self._parse_type()
 
-    def _parse_type(self):
-        self.is_hidden = self.path.name.startswith('.')
-        self.is_dir = self.path.is_dir()
+    @property
+    def is_hidden(self):
+        return self.path.name.startswith('.')
+
+    @property
+    def is_dir(self):
+        return self.path.is_dir()
 
     def _get_proptype(self):
         if self.is_dir:
@@ -44,12 +47,11 @@ class SimpleLine(BaseLine):
 
 
 class Line(BaseLine):
-    def __init__(self, cwd, path, winwidth, show_hidden):
-        self._cwd = cwd
+    def __init__(self, path, panel):
         self.path = path
-        self._winwidth = winwidth
-        self._show_hidden = show_hidden
-        self._parse_type()
+        self._cwd = panel.cwd
+        self._winwidth = panel.winwidth
+        self._show_hidden = panel.show_hidden
         self._set_text()
         self._set_textline()
         self._set_sort()
@@ -81,22 +83,29 @@ class Line(BaseLine):
 class Text(object):
     def __init__(self, panel):
         self.panel = panel
-        self.text = []
+        self._text = []
         for p in panel.path_list:
-            line = Line(panel.cwd, p, panel.winwidth, panel.show_hidden)
+            line = Line(p, panel)
             if self._ignore(line):
                 continue
-            self.text.append(line)
+            self._text.append(line)
         key = []
         if lfopt.sort_dir_first:
             key.append('sort_dir_first')
         if lfopt.sort_ignorecase:
             key.append('lower_text')
         if key == []:
-            self.text = sorted(self.text)
+            self._text = sorted(self._text)
         else:
-            self.text = sorted(self.text, key=attrgetter(*key))
-        self.props = [line.opt for line in self.text]
+            self._text = sorted(self._text, key=attrgetter(*key))
+
+    @property
+    def text(self):
+        return self._text
+
+    @property
+    def props(self):
+        return [line.opt for line in self._text]
 
     def _ignore(self, line: Line):
         if not self.panel.show_hidden:

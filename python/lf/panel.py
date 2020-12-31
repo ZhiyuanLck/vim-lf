@@ -250,12 +250,15 @@ class DirPanel(Panel):
         if self.is_middle:
             logger.info("cursor pos after refresh: {}".format(self.index))
 
-    def search_refresh(self, Text, pos_list):
+    def _search_refresh(self, Text):
         self.text = Text.text
         self.index = 0
         props = [' ' * self.winwidth] if self.empty() else Text.props
         vimcmd("call popup_settext({}, {})".format(self.winid, props))
         self._match_clear()
+
+    def regex_refresh(self, Text, pos_list):
+        self._search_refresh(Text)
         pos = 0
         for col, length in pos_list:
             pos += 1
@@ -623,7 +626,7 @@ class RegexSearchPanel(CliPanel):
 
     def _refresh(self):
         T, pos_list = self.regex_search.filter()
-        self.middle.search_refresh(T, pos_list)
+        self.middle.regex_refresh(T, pos_list)
         self.manager._change_right()
 
     def restore(self):
@@ -658,9 +661,8 @@ class RegexSearchPanel(CliPanel):
 
     def delete(self):
         super().delete()
-        if self.cmd == '':
-            self.restore()
-        else:
+        self.restore()
+        if self.cmd != '':
             self._refresh()
         self.history_idx = -1
 
