@@ -39,6 +39,7 @@ update_info = partial(_update, ignore=True)
 
 class Manager(object):
     def __init__(self):
+        self._is_start = False
         logger.info("INIT manager")
         vimcmd("call lf#colorscheme#highlight()")
         if lfopt.regex_search_history.exists():
@@ -75,6 +76,7 @@ class Manager(object):
                 logger.info("delete log before today")
 
     def start(self, cwd):
+        self._is_start = True
         logger.info("START manager")
         self.is_quit = False
         self.is_cfile = False
@@ -136,6 +138,8 @@ class Manager(object):
         logger.info("initialize cursor pos as {}".format(self.middle_panel.index))
 
     def resize(self):
+        if not self._is_start:
+            return
         panels = ["border", "left", "middle", "right", "info", "cli", "msg", "search"]
         for panel in panels:
             try:
@@ -464,6 +468,7 @@ class Manager(object):
         self._filter("ext")
 
     def quit(self):
+        self._is_start = False
         self._close()
         self.is_quit = True
         vimcmd("set laststatus={}".format(lfopt.laststatus))
